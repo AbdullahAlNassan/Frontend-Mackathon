@@ -25,7 +25,13 @@ export default function Button({
 
   return (
     <button {...rest} disabled={isLoading || rest.disabled} style={style}>
-      {isLoading ? "..." : children}
+      {isLoading ? (
+        <span style={{ display: "inline-block", transform: "translateY(2px)" }}>
+          ⏳
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

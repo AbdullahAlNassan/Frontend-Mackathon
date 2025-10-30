@@ -94,3 +94,9 @@ button {
   box-shadow: var(--shadow-sm);
   cursor: pointer;
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
