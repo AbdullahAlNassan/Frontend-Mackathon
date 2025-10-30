@@ -1,7 +1,9 @@
 import Header from "./Header";
 import Content from "./Content";
+import { Outlet } from "react-router-dom";
+import type { ReactNode } from "react";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children?: ReactNode }) {
   return (
     <div
       style={{
@@ -11,7 +13,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }}
     >
       <Header />
-      <Content>{children}</Content>
+      <Content>
+        {/* Toon ofwel de children (App.tsx) of de Router Outlet */}
+        {children ?? <Outlet />}
+      </Content>
     </div>
   );
 }
