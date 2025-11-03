@@ -1,22 +1,18 @@
 import Header from "./Header";
+import Sidebar from "./Sidebar";
 import Content from "./Content";
 import { Outlet } from "react-router-dom";
-import type { ReactNode } from "react";
 
-export default function Layout({ children }: { children?: ReactNode }) {
+export default function Layout() {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="app-shell">
       <Header />
-      <Content>
-        {/* Toon ofwel de children (App.tsx) of de Router Outlet */}
-        {children ?? <Outlet />}
-      </Content>
+      <div className="app-body">
+        <Sidebar />
+        <Content>
+          <Outlet />
+        </Content>
+      </div>
     </div>
   );
 }

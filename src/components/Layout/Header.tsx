@@ -2,9 +2,12 @@ export default function Header() {
   return (
     <header
       className="surface border"
-      style={{ padding: "var(--space-16) var(--space-24)" }}
+      style={{
+        padding: "var(--space-16)",
+        fontWeight: 600,
+      }}
     >
-      <strong>Omniform</strong>
+      <span>AppName</span>
     </header>
   );
 }

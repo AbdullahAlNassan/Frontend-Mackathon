@@ -100,3 +100,19 @@ button {
     transform: rotate(360deg);
   }
 }
+
+/* App shell layout: mobile-first */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+.app-body {
+  display: grid;
+  grid-template-columns: 1fr; /* mobiel */
+}
+@media (min-width: 1024px) {
+  .app-body {
+    grid-template-columns: 260px 1fr; /* desktop */
+  }
+}
