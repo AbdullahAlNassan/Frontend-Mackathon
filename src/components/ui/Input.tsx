@@ -10,35 +10,30 @@ export default function Input({
   label,
   error,
   helperText,
+  id,
+  name,
   ...rest
 }: InputProps) {
-  const border = error ? "var(--color-error)" : "var(--color-border)";
+  const inputId = id ?? name ?? undefined;
+  const errorId = inputId ? `${inputId}-error` : undefined;
 
   return (
-    <label className="stack" style={{ display: "block" }}>
-      {label && (
-        <span style={{ fontSize: "var(--fs-sm)", color: "var(--color-muted)" }}>
-          {label}
-        </span>
-      )}
+    <label className="input" htmlFor={inputId}>
+      {label && <span className="input__label">{label}</span>}
+
       <input
+        id={inputId}
+        className={`input__control ${error ? "input__control--error" : ""}`}
+        aria-invalid={!!error || undefined}
+        aria-describedby={error ? errorId : undefined}
         {...rest}
-        style={{
-          width: "100%",
-          padding: "12px 14px", // 4px grid
-          borderRadius: "var(--radius-sm)",
-          background: "var(--color-surface)",
-          border: `1px solid ${border}`,
-          color: "var(--color-text)",
-        }}
       />
-      {helperText && !error && (
-        <span style={{ fontSize: "var(--fs-sm)", color: "var(--color-muted)" }}>
-          {helperText}
-        </span>
+
+      {!error && helperText && (
+        <span className="input__hint">{helperText}</span>
       )}
       {error && (
-        <span style={{ fontSize: "var(--fs-sm)", color: "var(--color-error)" }}>
+        <span id={errorId} className="input__error">
           {error}
         </span>
       )}
