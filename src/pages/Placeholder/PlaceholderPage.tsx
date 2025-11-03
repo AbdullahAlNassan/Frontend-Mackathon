@@ -1,26 +1,24 @@
 import { useState } from "react";
-import { Button, Modal } from "../../components/ui";
+import { Select } from "../../components/ui";
 
 export default function PlaceholderPage() {
-  const [open, setOpen] = useState(false);
+  const [role, setRole] = useState(""); // 👈 HIER maak je de 'role' variabele
+
   return (
     <section className="stack" style={{ padding: "var(--space-40)" }}>
-      <h1>Template werkt ✅</h1>
-      <p>Layout, sidebar en grid actief.</p>
+      <h1>Test Select Component</h1>
 
-      <Button onClick={() => setOpen(true)}>Open modal</Button>
+      <Select
+        label="Rol"
+        value={role}
+        onChange={setRole}
+        options={[
+          { label: "Gebruiker", value: "user" },
+          { label: "Beheerder", value: "admin" },
+        ]}
+      />
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Voorbeeld modal">
-        <div className="stack">
-          <p>Dit is test content in de modal.</p>
-          <div className="inline">
-            <Button onClick={() => setOpen(false)}>Oké</Button>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Annuleren
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <p>Geselecteerde rol: {role || "geen"}</p>
     </section>
   );
 }
