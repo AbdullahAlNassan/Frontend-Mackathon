@@ -1,31 +1,34 @@
 import { useState } from "react";
-import { Input } from "../../components/ui";
+import { Select } from "../../components/ui";
+
 export default function PlaceholderPage() {
-  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
 
   return (
     <section className="stack" style={{ padding: "var(--space-40)" }}>
-      <h2>Input test</h2>
+      <h2>Select test</h2>
 
-      <Input
-        label="E-mail"
-        name="email"
-        type="email"
-        placeholder="jij@example.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        helperText="Gebruik je werkmail"
+      <Select
+        label="Rol"
+        value={role}
+        onChange={setRole}
+        options={[
+          { label: "Gebruiker", value: "user" },
+          { label: "Beheerder", value: "admin" },
+        ]}
+        helperText="Kies je rol"
       />
 
-      <Input
-        label="Wachtwoord"
-        name="password"
-        type="password"
-        placeholder="••••••"
-        error="Wachtwoord is te kort"
+      <Select
+        label="Met fout"
+        value={role}
+        onChange={setRole}
+        options={[
+          { label: "Optie A", value: "a" },
+          { label: "Optie B", value: "b" },
+        ]}
+        error="Dit veld is verplicht"
       />
-
-      <Input label="Disabled veld" placeholder="Niet beschikbaar" disabled />
     </section>
   );
 }
