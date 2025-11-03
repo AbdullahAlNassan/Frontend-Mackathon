@@ -116,3 +116,16 @@ button {
     grid-template-columns: 260px 1fr; /* desktop */
   }
 }
+input,
+select,
+textarea,
+button {
+  outline: none;
+}
+:where(input, select, textarea):focus {
+  border-color: var(--color-primary);
+}
+:where(button, input, select, textarea):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
