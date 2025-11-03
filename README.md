@@ -1,73 +1,205 @@
-# React + TypeScript + Vite
+Frontend Template – Mackathon Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dit is de frontend template voor het Mackathon-project.
+Gebouwd met React, TypeScript en Vite, met een duidelijke en schaalbare structuur.
+Het doel is om samenwerking eenvoudig te maken en herbruikbare UI-componenten te bieden.
 
-Currently, two official plugins are available:
+📂 Folderstructuur
+src/
+┣ components/
+┃ ┣ Layout/ # Header, Sidebar, Content, Layout
+┃ ┗ ui/ # Button, Input, Select, Checkbox, Loader, Modal
+┣ composables/ # Custom hooks
+┣ pages/ # LoginPage, PlaceholderPage
+┣ styles/ # globals.css, tokens.css
+┗ types/ # ui.ts, auth.ts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🔤 Naamgeving
+Type Notatie Voorbeeld
+Component / bestand PascalCase Button.tsx, LoginPage.tsx
+Variabelen / functies / props camelCase handleClick, userEmail
+Hooks use + camelCase useAuth, useFetch
+🎨 Styling & 4px Grid System
 
-## React Compiler
+Gebruik de variabelen uit src/styles/tokens.css.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Spacing:
+--space-4, --space-8, --space-12, --space-16, --space-24, --space-32, --space-40
 
-## Expanding the ESLint configuration
+Kleuren:
+--color-primary, --color-error, --color-border, --color-surface, --color-text
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Radii:
+--radius-sm, --radius-md, --radius-lg
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Shadows:
+--shadow-sm, --shadow-md
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Alle afstanden volgen het 4px-grid (4, 8, 12, 16, 20, 24 px, enz.)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+⚙️ Importeren (Barrel)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Gebruik barrel exports voor compacte imports:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+import { Button, Input, Checkbox, Select, Loader, Modal } from "@/components/ui";
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+🧱 UI Componenten
+Button
+
+Props:
+
+Prop Type Default
+variant "primary" | "ghost" "primary"
+size "sm" | "md" | "lg" "md"
+isLoading boolean false
+
+Voorbeelden:
+
+<Button variant="primary">Opslaan</Button>
+<Button variant="ghost" size="sm">Annuleren</Button>
+<Button size="lg" isLoading>Opslaan...</Button>
+<Button disabled>Niet klikbaar</Button>
+
+Input
+
+Props:
+
+Prop Type
+label? string
+error? string
+helperText? ReactNode
+
+Voorbeeld:
+
+<Input
+label="E-mail"
+name="email"
+type="email"
+value={email}
+onChange={(e) => setEmail(e.target.value)}
+error={errors.email}
+/>
+
+Select (controlled)
+
+Props:
+
+Prop Type
+label? string
+options { label: string; value: string }[]
+value string
+onChange (value: string) => void
+placeholder? string
+error? string
+
+Voorbeeld:
+
+const [role, setRole] = useState("");
+
+<Select
+label="Rol"
+value={role}
+onChange={setRole}
+options={[
+{ label: "Gebruiker", value: "user" },
+{ label: "Beheerder", value: "admin" },
+]}
+/>
+
+Checkbox
+
+Props:
+
+Prop Type
+label? string
+checked boolean
+onChange (e: React.ChangeEvent<HTMLInputElement>) => void
+error? string
+
+Voorbeeld:
+
+<Checkbox
+label="Onthoud mij"
+checked={remember}
+onChange={(e) => setRemember(e.target.checked)}
+/>
+
+Modal
+
+Props:
+
+Prop Type
+open boolean
+onClose () => void
+title? string
+children ReactNode
+
+Voorbeeld:
+
+const [open, setOpen] = useState(false);
+
+<>
+<Button onClick={() => setOpen(true)}>Open modal</Button>
+<Modal open={open} onClose={() => setOpen(false)} title="Voorbeeld">
+
+<p>Inhoud van de modal</p>
+<div className="inline">
+<Button onClick={() => setOpen(false)}>Oké</Button>
+<Button variant="ghost" onClick={() => setOpen(false)}>Annuleren</Button>
+</div>
+</Modal>
+</>
+
+🧩 TypeScript
+
+Alle componenten zijn sterk getypeerd (geen any).
+Herbruikbare types staan in /src/types.
+
+Voorbeeld (Select):
+
+export type Option = { label: string; value: string };
+
+Validatie (zoals login) gebruikt Zod + z.infer voor automatische type-afleiding.
+
+🧭 Layout Structuur
+
+De layout is mobile-first en gebruikt een eenvoudig grid-systeem:
+
+.app-shell {
+display: grid;
+grid-template-rows: auto 1fr;
+min-height: 100vh;
+}
+
+.app-body {
+display: grid;
+grid-template-columns: 1fr; /_ mobiel _/
+}
+
+@media (min-width: 1024px) {
+.app-body {
+grid-template-columns: 260px 1fr; /_ desktop _/
+}
+}
+
+Componenten:
+
+Header – bovenbalk
+
+Sidebar – navigatie (verborgen op mobiel)
+
+Content – hoofdgedeelte
+
+Layout – combineert alles
+
+✅ Statusoverzicht
+Onderdeel Status
+4px grid & tokens ✅
+Layout (Header, Sidebar, Content) ✅
+Responsive structuur ✅
+Globale CSS-variabelen ✅
+Reusable components ✅
+Strong TypeScript ✅
+Documentatie & barrel exports ✅
+
+Template volledig afgerond.
