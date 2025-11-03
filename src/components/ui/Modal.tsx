@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 
 type ModalProps = {
   open: boolean;
@@ -8,12 +8,12 @@ type ModalProps = {
 };
 
 export default function Modal({ open, onClose, title, children }: ModalProps) {
-  // Escape-toets sluit modal
+  // ESC sluit modal
   useEffect(() => {
     if (!open) return;
-    function onKeyDown(e: KeyboardEvent) {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-    }
+    };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
@@ -22,41 +22,19 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div
+      className="modal"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? "modal-title" : undefined}
       onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,.5)",
-        display: "grid",
-        placeItems: "center",
-        padding: "var(--space-24)",
-        zIndex: 50,
-      }}
     >
-      <div
-        className="surface"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%",
-          maxWidth: 520,
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-md)",
-          border: "1px solid var(--color-border)",
-          padding: "var(--space-24)",
-        }}
-      >
+      <div className="modal__panel" onClick={(e) => e.stopPropagation()}>
         {title && (
-          <h2
-            id="modal-title"
-            style={{ marginTop: 0, marginBottom: "var(--space-16)" }}
-          >
+          <h2 id="modal-title" className="modal__title">
             {title}
           </h2>
         )}
-        {children}
+        <div className="modal__body">{children}</div>
       </div>
     </div>
   );
