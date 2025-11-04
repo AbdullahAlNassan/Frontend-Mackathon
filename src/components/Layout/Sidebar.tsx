@@ -1,17 +1,16 @@
 export default function Sidebar() {
   return (
-    <aside
-      className="surface border"
-      style={{
-        padding: "var(--space-24)",
-        minWidth: 220,
-      }}
-    >
-      <nav className="stack" style={{ fontSize: "var(--fs-sm)" }}>
-        <strong style={{ fontSize: "var(--fs-md)" }}>Menu</strong>
-        <a href="#">Dashboard</a>
-        <a href="#">Instellingen</a>
-        <a href="#">Help</a>
+    <aside className="sidebar">
+      <nav className="sidebar__nav">
+        <a className="sidebar__link" href="#">
+          Home
+        </a>
+        <a className="sidebar__link" href="#">
+          Instellingen
+        </a>
+        <a className="sidebar__link" href="#">
+          Account
+        </a>
       </nav>
     </aside>
   );

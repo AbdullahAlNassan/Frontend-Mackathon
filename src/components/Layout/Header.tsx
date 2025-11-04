@@ -1,13 +1,19 @@
-export default function Header() {
+import { Button } from "../ui";
+type HeaderProps = {
+  onMenuToggle: () => void;
+};
+
+export default function Header({ onMenuToggle }: HeaderProps) {
   return (
-    <header
-      className="surface border"
-      style={{
-        padding: "var(--space-16)",
-        fontWeight: 600,
-      }}
-    >
-      <span>AppName</span>
+    <header className="header">
+      <Button
+        variant="ghost"
+        className="header__menu-btn"
+        onClick={onMenuToggle}
+      >
+        ☰
+      </Button>
+      <h1 className="header__title">Dashboard</h1>
     </header>
   );
 }
