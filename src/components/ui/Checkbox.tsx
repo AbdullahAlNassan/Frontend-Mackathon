@@ -5,36 +5,31 @@ type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
   error?: string;
 };
 
-export default function Checkbox({ label, error, ...rest }: CheckboxProps) {
+export default function Checkbox({
+  label,
+  error,
+  id,
+  name,
+  ...rest
+}: CheckboxProps) {
+  const inputId = id ?? name ?? undefined;
+  const errorId = inputId ? `${inputId}-error` : undefined;
+
   return (
-    <label
-      className="inline"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "var(--space-8)",
-        cursor: "pointer",
-      }}
-    >
+    <label className="checkbox" htmlFor={inputId}>
       <input
-        {...rest}
+        id={inputId}
         type="checkbox"
-        style={{
-          width: 18,
-          height: 18,
-          accentColor: "var(--color-primary)",
-          borderRadius: "var(--radius-sm)",
-        }}
+        className={`checkbox__control ${
+          error ? "checkbox__control--error" : ""
+        }`}
+        aria-invalid={!!error || undefined}
+        aria-describedby={error ? errorId : undefined}
+        {...rest}
       />
-      {label && <span>{label}</span>}
+      {label && <span className="checkbox__label">{label}</span>}
       {error && (
-        <span
-          style={{
-            fontSize: "var(--fs-sm)",
-            color: "var(--color-error)",
-            marginLeft: "var(--space-8)",
-          }}
-        >
+        <span id={errorId} className="checkbox__error">
           {error}
         </span>
       )}

@@ -1,0 +1,49 @@
+.checkbox {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: var(--space-8);
+
+  &__control {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    &:checked {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--error {
+      border-color: var(--color-error);
+    }
+  }
+
+  &__label {
+    color: var(--color-text);
+    font-size: var(--fs-md);
+  }
+
+  &__error {
+    grid-column: 1 / -1;
+    font-size: var(--fs-sm);
+    color: var(--color-error);
+  }
+}
