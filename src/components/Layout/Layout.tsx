@@ -1,18 +1,16 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Content from "./Content";
-import { Outlet } from "react-router-dom";
+import { useState } from "react";
 
 export default function Layout() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <div className="app-shell">
-      <Header />
-      <div className="app-body">
-        <Sidebar />
-        <Content>
-          <Outlet />
-        </Content>
-      </div>
+    <div className={`layout ${menuOpen ? "layout--menu-open" : ""}`}>
+      <Header onMenuToggle={() => setMenuOpen(!menuOpen)} />
+      <Sidebar />
+      <Content />
     </div>
   );
 }

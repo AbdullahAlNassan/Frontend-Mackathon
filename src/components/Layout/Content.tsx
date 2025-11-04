@@ -1,14 +1,11 @@
-import { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 
-export default function Content({ children }: { children: ReactNode }) {
+export default function Content() {
   return (
-    <main
-      className="container"
-      style={{
-        padding: "var(--space-24)",
-      }}
-    >
-      {children}
+    <main className="content">
+      <div className="content__inner">
+        <Outlet />
+      </div>
     </main>
   );
 }
