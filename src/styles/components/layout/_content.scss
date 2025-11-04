@@ -1,0 +1,10 @@
+.content {
+  grid-area: content;
+  padding: var(--space-24);
+  overflow-y: auto;
+
+  &__inner {
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+}
