@@ -1,0 +1,39 @@
+.login-page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-24);
+
+  &__container {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  &__card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-32);
+    box-shadow: var(--shadow-md);
+  }
+
+  &__title {
+    margin: 0 0 var(--space-24) 0;
+    font-size: var(--fs-2xl);
+    text-align: center;
+    color: var(--color-text);
+  }
+
+  &__form {
+    width: 100%;
+  }
+
+  // Responsive
+  @media (max-width: 480px) {
+    padding: var(--space-16);
+    
+    &__card {
+      padding: var(--space-24);
+    }
+  }
+}
