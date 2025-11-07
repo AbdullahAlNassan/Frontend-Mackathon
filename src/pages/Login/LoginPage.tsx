@@ -68,13 +68,19 @@ export default function LoginPage() {
         return;
       }
 
-      // Succesvolle login
-      setIsPageLoading(true);
+      // Simuleer 2FA requirement (bijv. voor specifieke gebruikers)
+      const requires2FA = email.includes("2fa") || Math.random() > 0.5;
       
-      // Simulate redirect loading
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      if (requires2FA) {
+        // Redirect naar 2FA email pagina
+        navigate(`/two-factor/email?username=${encodeURIComponent(email)}`);
+      } else {
+        // Direct naar dashboard
+        setIsPageLoading(true);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      }
     }, 2000);
   };
 
