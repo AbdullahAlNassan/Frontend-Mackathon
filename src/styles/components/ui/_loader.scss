@@ -7,26 +7,63 @@
     display: inline-flex;
   }
 
-  &--sm .loader__spinner {
-    width: 14px;
-    height: 14px;
+  // Sizes
+  &--sm {
+    .loader__spinner,
+    .loader__pulse,
+    .loader__dots span {
+      width: 14px;
+      height: 14px;
+    }
   }
-  &--md .loader__spinner {
-    width: 18px;
-    height: 18px;
+  
+  &--md {
+    .loader__spinner,
+    .loader__pulse,
+    .loader__dots span {
+      width: 18px;
+      height: 18px;
+    }
   }
-  &--lg .loader__spinner {
-    width: 22px;
-    height: 22px;
+  
+  &--lg {
+    .loader__spinner,
+    .loader__pulse,
+    .loader__dots span {
+      width: 22px;
+      height: 22px;
+    }
   }
 
+  // Spinner variant
   &__spinner {
-    width: 18px;
-    height: 18px;
     border-radius: 50%;
     border: 2px solid var(--color-border);
     border-top-color: var(--color-primary);
     animation: loader-spin 0.8s linear infinite;
+  }
+
+  // Dots variant
+  &__dots {
+    display: flex;
+    gap: 4px;
+
+    span {
+      border-radius: 50%;
+      background: var(--color-primary);
+      animation: loader-bounce 1.4s ease-in-out infinite both;
+
+      &:nth-child(1) { animation-delay: -0.32s; }
+      &:nth-child(2) { animation-delay: -0.16s; }
+      &:nth-child(3) { animation-delay: 0s; }
+    }
+  }
+
+  // Pulse variant
+  &__pulse {
+    border-radius: 50%;
+    background: var(--color-primary);
+    animation: loader-pulse 1.2s ease-in-out infinite;
   }
 
   &__label {
@@ -35,8 +72,59 @@
   }
 }
 
+// Page loader voor full-screen loading
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-16);
+  }
+
+  &__text {
+    font-size: var(--fs-md);
+    color: var(--color-muted);
+  }
+}
+
 @keyframes loader-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes loader-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
   }
 }

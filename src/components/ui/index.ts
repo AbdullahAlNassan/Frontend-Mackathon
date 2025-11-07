@@ -4,3 +4,4 @@ export { default as Checkbox } from "./Checkbox";
 export { default as Select } from "./Select";
 export { default as Loader } from "./Loader";
 export { default as Modal } from "./Modal";
+export { default as PageLoader } from "./PageLoader"; // ← Nieuwe export

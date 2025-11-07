@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Checkbox } from "../../components/ui";
+import { Button, Input, Checkbox, Loader, PageLoader } from "../../components/ui";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,13 +17,22 @@ export default function LoginPage() {
     // TODO: Backend authentication call
     console.log({ email, password, rememberMe });
     
-    // Simulate API call - succesvolle login
+    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      // Redirect naar dashboard bij succes
-      navigate("/dashboard");
+      setIsPageLoading(true);
+      
+      // Simulate redirect loading
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
     }, 2000);
   };
+
+  // Toon fullscreen loader tijdens redirect
+  if (isPageLoading) {
+    return <PageLoader text="Doorsturen naar dashboard..." variant="dots" />;
+  }
 
   return (
     <div className="login-page">
@@ -42,6 +52,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="voorbeeld@email.nl"
                 required
+                disabled={isLoading}
               />
               
               <Input
@@ -51,6 +62,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                disabled={isLoading}
               />
               
               <div className="login-page__options">
@@ -58,6 +70,7 @@ export default function LoginPage() {
                   label="Onthoud mij"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={isLoading}
                 />
               </div>
               
@@ -68,7 +81,14 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="login-page__submit"
               >
-                {isLoading ? "Inloggen..." : "Inloggen"}
+                {isLoading ? (
+                  <>
+                    <Loader size="sm" variant="dots" />
+                    Inloggen...
+                  </>
+                ) : (
+                  "Inloggen"
+                )}
               </Button>
             </form>
           </div>
