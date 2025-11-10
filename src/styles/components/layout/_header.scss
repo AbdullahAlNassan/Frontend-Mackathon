@@ -3,20 +3,49 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-12);
   padding: var(--space-16) var(--space-24);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 
-  &__menu-btn {
-    display: inline-flex;
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+  }
+  &__logo {
+    font-size: 20px;
+  }
+  &__brand {
+    font-weight: 700;
+  }
 
+  /* menu-knop alleen op mobiel */
+  &__menu-btn {
     @media (min-width: 768px) {
       display: none;
     }
   }
+}
 
-  &__title {
-    font-size: var(--fs-xl);
-    margin: 0;
+/* header knoppen */
+.toggle,
+.time,
+.logout {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
   }
+}
+.toggle--active {
+  background: rgba(79, 124, 255, 0.12);
+  border-color: var(--color-primary);
 }
