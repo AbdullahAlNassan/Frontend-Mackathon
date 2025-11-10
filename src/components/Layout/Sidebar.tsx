@@ -1,17 +1,29 @@
 export default function Sidebar() {
   return (
     <aside className="sidebar">
-      <nav className="sidebar__nav">
-        <a className="sidebar__link" href="#">
-          Home
-        </a>
-        <a className="sidebar__link" href="#">
-          Instellingen
-        </a>
-        <a className="sidebar__link" href="#">
-          Account
-        </a>
-      </nav>
+      <details className="dropdown" open>
+        <summary className="dropdown__summary">container</summary>
+        <nav className="dropdown__list">
+          <a className="dropdown__item" href="#">
+            overview
+          </a>
+          <a className="dropdown__item" href="#">
+            logs
+          </a>
+        </nav>
+      </details>
+
+      <details className="dropdown">
+        <summary className="dropdown__summary">settings</summary>
+        <nav className="dropdown__list">
+          <a className="dropdown__item" href="#">
+            profile
+          </a>
+          <a className="dropdown__item" href="#">
+            preferences
+          </a>
+        </nav>
+      </details>
     </aside>
   );
 }
