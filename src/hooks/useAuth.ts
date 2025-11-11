@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCodeInput } from "./useCodeInput";
 import type { User, LoginResponse } from "../types/auth";
 
 type LoginError = {
@@ -14,7 +15,6 @@ type LoginState = 'initial' | '2fa-email' | '2fa-totp' | '2fa-setup' | 'success'
 export const useAuth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -24,18 +24,24 @@ export const useAuth = () => {
   
   const navigate = useNavigate();
 
-  // Simuleer backend response - CORRECTIE: setup2fa alleen voor MFA
+  // Gebruik useCodeInput hook ipv eigen state management
+  const {
+    code,
+    setCode,
+    setInputRef,
+    handleCodeChange,
+    handleKeyDown,
+    resetCode,
+    setFocusToFirst
+  } = useCodeInput(6);
+
+  // Simuleer backend response
   const simulateBackendLogin = useCallback((email: string, password: string) => {
     const scenarios = [
-      // Email 2FA - directe challenge, geen setup nodig
       { status: "success", redirectUrl: "/inloggen?challenge=email", method: "email" },
-      // TOTP MFA - directe challenge, geen setup nodig  
       { status: "success", redirectUrl: "/inloggen?challenge=totp", method: "mfa" },
-      // MFA Setup - alleen voor TOTP wanneer gebruiker nog geen MFA heeft
       { status: "success", redirectUrl: "/inloggen?setup2fa=true&username=" + encodeURIComponent(email), method: "mfa" },
-      // Directe login (geen 2FA)
       { status: "success", redirectUrl: "/dashboard", method: "direct" },
-      // Error case
       { status: "error", message: "Onjuiste inloggegevens" }
     ];
     
@@ -57,14 +63,13 @@ export const useAuth = () => {
     };
   }, []);
 
-  // Handle backend response - CORRECTIE: setup2fa alleen voor MFA
+  // Handle backend response
   const handleBackendResponse = useCallback((response: any) => {
     if (response.status === "error") {
       setErrors({ general: response.message });
       return;
     }
 
-    // Directe redirect naar dashboard
     if (response.redirectUrl === "/dashboard") {
       setLoginState('success');
       setTimeout(() => navigate("/dashboard"), 1000);
@@ -75,20 +80,21 @@ export const useAuth = () => {
     
     if (url.searchParams.get('challenge') === 'email') {
       setLoginState('2fa-email');
+      // Focus eerste input wanneer 2FA scherm wordt getoond
+      setTimeout(() => setFocusToFirst(), 100);
     } else if (url.searchParams.get('challenge') === 'totp') {
       setLoginState('2fa-totp');
+      setTimeout(() => setFocusToFirst(), 100);
     } else if (url.searchParams.get('setup2fa') === 'true') {
-      // SETUP2FA ALLEEN VOOR MFA (TOTP) - geen email setup!
       setLoginState('2fa-setup');
     }
-  }, [navigate]);
+  }, [navigate, setFocusToFirst]);
 
   // Initial login
   const handleInitialLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
-    // Basic validation
     if (!email || !password) {
       setErrors({ 
         email: !email ? "E-mail is verplicht" : undefined,
@@ -99,7 +105,6 @@ export const useAuth = () => {
 
     setIsLoading(true);
 
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       const response = simulateBackendLogin(email, password);
@@ -108,9 +113,8 @@ export const useAuth = () => {
   }, [email, password, simulateBackendLogin, handleBackendResponse]);
 
   // 2FA code verification
-  const handle2FASubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    const fullCode = code.join("");
+  const handle2FASubmit = useCallback(async (codeToVerify?: string) => {
+    const fullCode = codeToVerify || code.join("");
     
     if (fullCode.length !== 6) {
       setErrors({ code: "Voer de 6-cijferige code in" });
@@ -119,13 +123,11 @@ export const useAuth = () => {
 
     setIsLoading(true);
 
-    // Simuleer 2FA verificatie
     setTimeout(() => {
       try {
         const response: LoginResponse = simulate2FAVerification(fullCode, email);
         
         if (response.success) {
-          // Opslaan user data
           setUser({
             id: response.userId,
             username: response.User,
@@ -135,7 +137,6 @@ export const useAuth = () => {
           setIsLoading(false);
           setLoginState('success');
           
-          // Redirect naar dashboard met user data
           setTimeout(() => {
             navigate("/dashboard", { 
               state: { 
@@ -151,10 +152,10 @@ export const useAuth = () => {
       } catch (error: any) {
         setIsLoading(false);
         setErrors({ code: error.message });
-        setCode(["", "", "", "", "", ""]);
+        resetCode(); // Reset code met proper hook
       }
     }, 1500);
-  }, [code, email, simulate2FAVerification, navigate]);
+  }, [code, email, simulate2FAVerification, navigate, resetCode]);
 
   // Resend 2FA code
   const handleResendCode = useCallback(async () => {
@@ -162,20 +163,15 @@ export const useAuth = () => {
     setTimeout(() => {
       setIsResending(false);
       setCountdown(30);
-      setCode(["", "", "", "", "", ""]);
+      resetCode(); // Reset code met proper hook
       setErrors({});
     }, 1000);
-  }, []);
+  }, [resetCode]);
 
-  // Code input management
-  const handleCodeChange = useCallback((index: number, value: string) => {
-    if (value.length > 1) return;
-    
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
-    setErrors(prev => ({ ...prev, code: undefined }));
-  }, [code]);
+  // Auto-submit handler voor useCodeInput
+  const handleAutoSubmit = useCallback((fullCode: string) => {
+    handle2FASubmit(fullCode);
+  }, [handle2FASubmit]);
 
   // Clear errors
   const clearErrors = useCallback(() => {
@@ -186,10 +182,10 @@ export const useAuth = () => {
   const resetForm = useCallback(() => {
     setEmail("");
     setPassword("");
-    setCode(["", "", "", "", "", ""]);
+    resetCode(); // Reset code met proper hook
     setErrors({});
     setLoginState('initial');
-  }, []);
+  }, [resetCode]);
 
   return {
     // State
@@ -198,7 +194,6 @@ export const useAuth = () => {
     password,
     setPassword,
     code,
-    setCode,
     isLoading,
     isResending,
     countdown,
@@ -206,11 +201,16 @@ export const useAuth = () => {
     loginState,
     user,
     
+    // Refs en code handlers
+    setInputRef,
+    handleCodeChange: (index: number, value: string) => 
+      handleCodeChange(index, value, handleAutoSubmit),
+    handleKeyDown,
+    
     // Actions
     handleInitialLogin,
     handle2FASubmit,
     handleResendCode,
-    handleCodeChange,
     clearErrors,
     resetForm,
     setLoginState,

@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { useAuth, useCountdown, useAutoFocus } from "../../hooks";
+import { useAuth, useCountdown } from "../../hooks";
 import { Button, Input, Form, FormField, Loader, PageLoader } from "../../components/ui";
 
 export default function LoginPage() {
@@ -9,47 +8,33 @@ export default function LoginPage() {
     password,
     setPassword,
     code,
-    setCode,
     isLoading,
     isResending,
     errors,
     loginState,
+    setInputRef,
+    handleCodeChange,
+    handleKeyDown,
     handleInitialLogin,
     handle2FASubmit,
     handleResendCode,
-    handleCodeChange,
     setLoginState,
     setErrors
   } = useAuth();
 
   const { countdown, startCountdown } = useCountdown();
-  const firstInputRef = useAutoFocus(loginState === '2fa-email' || loginState === '2fa-totp');
 
   const handleResendWithCountdown = async () => {
     await handleResendCode();
     startCountdown(30);
   };
 
-  const handleCodeChangeWithSubmit = (index: number, value: string) => {
-    handleCodeChange(index, value);
-    
-    if (index === 5 && value) {
-      const newCode = [...code];
-      newCode[index] = value;
-      const fullCode = newCode.join("");
-      if (fullCode.length === 6) {
-        handle2FASubmit(new Event('submit') as any);
-      }
-    }
+  const handleForm2FASubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handle2FASubmit();
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      // Focus zal nu via refs worden gedaan
-    }
-  };
-
-  // Render verschillende states
+  // Render functies
   const renderInitialLogin = () => (
     <>
       <div className="login-page__header">
@@ -124,7 +109,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <Form onSubmit={handle2FASubmit} spacing="md">
+      <Form onSubmit={handleForm2FASubmit} spacing="md">
         <div className="login-page__code-section">
           <label className="login-page__code-label">
             Voer de 6-cijferige code in:
@@ -133,13 +118,13 @@ export default function LoginPage() {
             {code.map((digit, index) => (
               <Input
                 key={index}
-                ref={index === 0 ? firstInputRef : undefined}
+                ref={setInputRef(index)}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={1}
                 value={digit}
-                onChange={(e) => handleCodeChangeWithSubmit(index, e.target.value)}
+                onChange={(e) => handleCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="login-page__code-input"
                 disabled={isLoading}
@@ -195,7 +180,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <Form onSubmit={handle2FASubmit} spacing="md">
+      <Form onSubmit={handleForm2FASubmit} spacing="md">
         <div className="login-page__code-section">
           <label className="login-page__code-label">
             Voer de 6-cijferige code in:
@@ -204,13 +189,13 @@ export default function LoginPage() {
             {code.map((digit, index) => (
               <Input
                 key={index}
-                ref={index === 0 ? firstInputRef : undefined}
+                ref={setInputRef(index)}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={1}
                 value={digit}
-                onChange={(e) => handleCodeChangeWithSubmit(index, e.target.value)}
+                onChange={(e) => handleCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="login-page__code-input"
                 disabled={isLoading}
@@ -234,7 +219,6 @@ export default function LoginPage() {
     </>
   );
 
-  // CORRECTIE: 2FA setup is alleen voor MFA (TOTP) - geen email optie
   const render2FASetup = () => (
     <>
       <div className="login-page__header">
