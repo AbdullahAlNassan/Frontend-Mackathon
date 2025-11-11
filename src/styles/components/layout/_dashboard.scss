@@ -1,0 +1,30 @@
+.dashboard {
+  /* mobile-first */
+  display: grid;
+  grid-template-areas:
+    "header"
+    "content";
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  background: var(--color-app-bg);
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 280px 1fr;
+    grid-template-areas:
+      "sidebar header"
+      "sidebar content";
+  }
+
+  &__content {
+    grid-area: content;
+    overflow: hidden; /* map mag tot randen */
+    position: relative;
+  }
+  &__map {
+    width: 100%;
+    height: calc(100vh - 56px); /* = header hoogte op mobiel */
+    @media (min-width: 1024px) {
+      height: 100%;
+    }
+  }
+}

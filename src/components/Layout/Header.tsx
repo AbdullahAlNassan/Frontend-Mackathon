@@ -1,12 +1,17 @@
 import { Button } from "../ui";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useClock } from "../../composables/useClock";
-type HeaderProps = { onMenuToggle?: () => void };
 
-export default function Header({ onMenuToggle }: HeaderProps) {
+type HeaderProps = {
+  onMenuToggle?: () => void;
+  menuOpen?: boolean;
+};
+
+export default function Header({ onMenuToggle, menuOpen }: HeaderProps) {
   const [tech, setTech] = useState(false);
   const [alert, setAlert] = useState(false);
   const time = useClock(30000);
+  const sidebarId = useId();
 
   return (
     <header className="header">
@@ -16,7 +21,9 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             variant="ghost"
             className="header__menu-btn"
             onClick={onMenuToggle}
-            aria-label="open menu"
+            aria-label={menuOpen ? "Sluit menu" : "Open menu"}
+            aria-controls={sidebarId}
+            aria-expanded={!!menuOpen}
           >
             ☰
           </Button>
@@ -42,10 +49,16 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         >
           alert
         </button>
-        <button className="time" aria-label="tijd">
+
+        <span className="time" aria-label="tijd">
           {time}
-        </button>
-        <button className="logout" onClick={() => console.log("logout")}>
+        </span>
+
+        <button
+          className="logout"
+          onClick={() => console.log("logout")}
+          aria-label="Log uit"
+        >
           logout
         </button>
       </div>
