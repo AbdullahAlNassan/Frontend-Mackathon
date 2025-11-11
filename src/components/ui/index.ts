@@ -5,3 +5,5 @@ export { default as Select } from "./Select";
 export { default as Loader } from "./Loader";
 export { default as Modal } from "./Modal";
 export { default as PageLoader } from "./PageLoader";
+export { default as Form } from "./Form";
+export { default as FormField } from "./FormField";

@@ -1,6 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Checkbox, Loader, PageLoader } from "../../components/ui";
+import {
+  Button,
+  Input,
+  Checkbox,
+  Loader,
+  PageLoader,
+  Form,
+  FormField,
+} from "../../components/ui";
 import type { LoginResponse, User } from "../../types/auth";
 
 type LoginError = {
@@ -10,7 +18,12 @@ type LoginError = {
   code?: string;
 };
 
-type LoginState = 'initial' | '2fa-email' | '2fa-totp' | '2fa-setup' | 'success';
+type LoginState =
+  | "initial"
+  | "2fa-email"
+  | "2fa-totp"
+  | "2fa-setup"
+  | "success";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,9 +34,12 @@ export default function LoginPage() {
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState<LoginError>({});
-  const [loginState, setLoginState] = useState<LoginState>('initial');
+  const [loginState, setLoginState] = useState<LoginState>("initial");
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+
+  // Refs voor code inputs
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Countdown voor resend
   useEffect(() => {
@@ -35,9 +51,11 @@ export default function LoginPage() {
 
   // Auto-focus eerste input bij 2FA
   useEffect(() => {
-    if (loginState === '2fa-email' || loginState === '2fa-totp') {
-      const firstInput = document.getElementById("code-0");
-      firstInput?.focus();
+    if (
+      (loginState === "2fa-email" || loginState === "2fa-totp") &&
+      inputRefs.current[0]
+    ) {
+      inputRefs.current[0]?.focus();
     }
   }, [loginState]);
 
@@ -45,12 +63,25 @@ export default function LoginPage() {
   const simulateBackendLogin = (email: string, password: string) => {
     // Random keuze voor demo purposes
     const scenarios = [
-      { status: "success", redirectUrl: "/inloggen?challenge=email", method: "email" },
-      { status: "success", redirectUrl: "/inloggen?challenge=totp", method: "mfa" },
-      { status: "success", redirectUrl: "/inloggen?setup2fa=true&username=" + encodeURIComponent(email), method: "email" },
-      { status: "error", message: "Onjuiste inloggegevens" }
+      {
+        status: "success",
+        redirectUrl: "/inloggen?challenge=email",
+        method: "email",
+      },
+      {
+        status: "success",
+        redirectUrl: "/inloggen?challenge=totp",
+        method: "mfa",
+      },
+      {
+        status: "success",
+        redirectUrl:
+          "/inloggen?setup2fa=true&username=" + encodeURIComponent(email),
+        method: "email",
+      },
+      { status: "error", message: "Onjuiste inloggegevens" },
     ];
-    
+
     return scenarios[Math.floor(Math.random() * scenarios.length)];
   };
 
@@ -65,7 +96,7 @@ export default function LoginPage() {
       message: "Login completed successfully",
       userId: "user-123",
       User: email,
-      Role: "user"
+      Role: "user",
     };
   };
 
@@ -77,15 +108,15 @@ export default function LoginPage() {
     }
 
     const url = new URL(response.redirectUrl, window.location.origin);
-    
-    if (url.searchParams.get('challenge') === 'email') {
-      setLoginState('2fa-email');
-    } else if (url.searchParams.get('challenge') === 'totp') {
-      setLoginState('2fa-totp');
-    } else if (url.searchParams.get('setup2fa') === 'true') {
-      setLoginState('2fa-setup');
+
+    if (url.searchParams.get("challenge") === "email") {
+      setLoginState("2fa-email");
+    } else if (url.searchParams.get("challenge") === "totp") {
+      setLoginState("2fa-totp");
+    } else if (url.searchParams.get("setup2fa") === "true") {
+      setLoginState("2fa-setup");
     } else {
-      setLoginState('success');
+      setLoginState("success");
       navigate("/dashboard");
     }
   };
@@ -97,9 +128,9 @@ export default function LoginPage() {
 
     // Basic validation
     if (!email || !password) {
-      setErrors({ 
+      setErrors({
         email: !email ? "E-mail is verplicht" : undefined,
-        password: !password ? "Wachtwoord is verplicht" : undefined
+        password: !password ? "Wachtwoord is verplicht" : undefined,
       });
       return;
     }
@@ -118,7 +149,7 @@ export default function LoginPage() {
   const handle2FASubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const fullCode = code.join("");
-    
+
     if (fullCode.length !== 6) {
       setErrors({ code: "Voer de 6-cijferige code in" });
       return;
@@ -130,28 +161,28 @@ export default function LoginPage() {
     setTimeout(() => {
       try {
         const response: LoginResponse = simulate2FAVerification(fullCode);
-        
+
         if (response.success) {
           // Opslaan user data
           setUser({
             id: response.userId,
             username: response.User,
-            role: response.Role
+            role: response.Role,
           });
-          
+
           setIsLoading(false);
-          setLoginState('success');
-          
+          setLoginState("success");
+
           // Redirect naar dashboard met user data
           setTimeout(() => {
-            navigate("/dashboard", { 
-              state: { 
+            navigate("/dashboard", {
+              state: {
                 user: {
                   id: response.userId,
                   username: response.User,
-                  role: response.Role
-                }
-              }
+                  role: response.Role,
+                },
+              },
             });
           }, 1000);
         }
@@ -159,8 +190,7 @@ export default function LoginPage() {
         setIsLoading(false);
         setErrors({ code: error.message });
         setCode(["", "", "", "", "", ""]);
-        const firstInput = document.getElementById("code-0");
-        firstInput?.focus();
+        inputRefs.current[0]?.focus();
       }
     }, 1500);
   };
@@ -173,39 +203,41 @@ export default function LoginPage() {
       setCountdown(30);
       setCode(["", "", "", "", "", ""]);
       setErrors({});
-      const firstInput = document.getElementById("code-0");
-      firstInput?.focus();
+      inputRefs.current[0]?.focus();
     }, 1000);
   };
 
   // Code input management
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) return;
-    
+
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
-    setErrors(prev => ({ ...prev, code: undefined }));
+    setErrors((prev) => ({ ...prev, code: undefined }));
 
     // Auto-focus volgende input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`code-${index + 1}`);
-      nextInput?.focus();
+    if (value && index < 5 && inputRefs.current[index + 1]) {
+      inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit bij laatste karakter
     if (index === 5 && value) {
       const fullCode = newCode.join("");
       if (fullCode.length === 6) {
-        handle2FASubmit(new Event('submit') as any);
+        handle2FASubmit(e as any);
       }
     }
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      const prevInput = document.getElementById(`code-${index - 1}`);
-      prevInput?.focus();
+    if (
+      e.key === "Backspace" &&
+      !code[index] &&
+      index > 0 &&
+      inputRefs.current[index - 1]
+    ) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -222,30 +254,32 @@ export default function LoginPage() {
           ⚠️ {errors.general}
         </div>
       )}
-      
-      <form className="login-page__form stack" onSubmit={handleInitialLogin}>
-        <Input
-          label="E-mailadres"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="voorbeeld@email.nl"
-          required
-          disabled={isLoading}
-          error={errors.email}
-        />
-        
-        <Input
-          label="Wachtwoord"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••"
-          required
-          disabled={isLoading}
-          error={errors.password}
-        />
-        
+
+      <Form
+        onSubmit={handleInitialLogin}
+        spacing="md"
+        className="login-page__form"
+      >
+        <FormField label="E-mailadres" error={errors.email} required>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="voorbeeld@email.nl"
+            disabled={isLoading}
+          />
+        </FormField>
+
+        <FormField label="Wachtwoord" error={errors.password} required>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            disabled={isLoading}
+          />
+        </FormField>
+
         <div className="login-page__options">
           <Checkbox
             label="Onthoud mij"
@@ -254,17 +288,17 @@ export default function LoginPage() {
             disabled={isLoading}
           />
         </div>
-        
-        <Button 
-          type="submit" 
-          variant="primary" 
+
+        <Button
+          type="submit"
+          variant="primary"
           isLoading={isLoading}
           disabled={isLoading}
           className="login-page__submit"
         >
           {isLoading ? "Inloggen..." : "Inloggen"}
         </Button>
-      </form>
+      </Form>
     </>
   );
 
@@ -283,30 +317,32 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form className="login-page__form" onSubmit={handle2FASubmit}>
-        <div className="login-page__code-section">
-          <label className="login-page__code-label">
-            Voer de 6-cijferige code in:
-          </label>
-          <div className="login-page__code-inputs">
-            {code.map((digit, index) => (
-              <Input
-                key={index}
-                id={`code-${index}`}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleCodeChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="login-page__code-input"
-                autoFocus={index === 0}
-                disabled={isLoading}
-              />
-            ))}
+      <Form onSubmit={handle2FASubmit} className="login-page__form">
+        <FormField error={errors.code}>
+          <div className="login-page__code-section">
+            <label className="login-page__code-label">
+              Voer de 6-cijferige code in:
+            </label>
+            <div className="login-page__code-inputs">
+              {code.map((digit, index) => (
+                <Input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="login-page__code-input"
+                  autoFocus={index === 0}
+                  disabled={isLoading}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </FormField>
 
         <div className="login-page__actions">
           <Button
@@ -327,14 +363,19 @@ export default function LoginPage() {
             disabled={isResending || countdown > 0}
             className="login-page__resend-btn"
           >
-            {isResending ? "Verzenden..." : countdown > 0 ? `Opnieuw verzenden (${countdown}s)` : "Code opnieuw verzenden"}
+            {isResending
+              ? "Verzenden..."
+              : countdown > 0
+              ? `Opnieuw verzenden (${countdown}s)`
+              : "Code opnieuw verzenden"}
           </Button>
         </div>
-      </form>
+      </Form>
 
       <div className="login-page__help">
         <p className="login-page__help-text">
-          💡 <strong>Tip:</strong> Check je spam folder als je de e-mail niet kunt vinden.
+          💡 <strong>Tip:</strong> Check je spam folder als je de e-mail niet
+          kunt vinden.
         </p>
       </div>
     </>
@@ -355,30 +396,32 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form className="login-page__form" onSubmit={handle2FASubmit}>
-        <div className="login-page__code-section">
-          <label className="login-page__code-label">
-            Voer de 6-cijferige code in:
-          </label>
-          <div className="login-page__code-inputs">
-            {code.map((digit, index) => (
-              <Input
-                key={index}
-                id={`code-${index}`}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleCodeChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="login-page__code-input"
-                autoFocus={index === 0}
-                disabled={isLoading}
-              />
-            ))}
+      <Form onSubmit={handle2FASubmit} className="login-page__form">
+        <FormField error={errors.code}>
+          <div className="login-page__code-section">
+            <label className="login-page__code-label">
+              Voer de 6-cijferige code in:
+            </label>
+            <div className="login-page__code-inputs">
+              {code.map((digit, index) => (
+                <Input
+                  key={index}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="login-page__code-input"
+                  autoFocus={index === 0}
+                  disabled={isLoading}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </FormField>
 
         <div className="login-page__actions">
           <Button
@@ -391,7 +434,7 @@ export default function LoginPage() {
             {isLoading ? "Verifiëren..." : "Verifieer"}
           </Button>
         </div>
-      </form>
+      </Form>
     </>
   );
 
@@ -407,10 +450,10 @@ export default function LoginPage() {
       <div className="login-page__setup-options">
         <p>Kies je 2FA methode:</p>
         <div className="login-page__setup-buttons">
-          <Button variant="primary" onClick={() => setLoginState('2fa-email')}>
+          <Button variant="primary" onClick={() => setLoginState("2fa-email")}>
             Email Verificatie
           </Button>
-          <Button variant="ghost" onClick={() => setLoginState('2fa-totp')}>
+          <Button variant="ghost" onClick={() => setLoginState("2fa-totp")}>
             Authenticator App
           </Button>
         </div>
@@ -418,7 +461,7 @@ export default function LoginPage() {
     </>
   );
 
-  if (loginState === 'success') {
+  if (loginState === "success") {
     return <PageLoader text="Doorsturen naar dashboard..." variant="dots" />;
   }
 
@@ -427,10 +470,10 @@ export default function LoginPage() {
       <div className="login-page__background">
         <div className="login-page__container">
           <div className="login-page__card">
-            {loginState === 'initial' && renderInitialLogin()}
-            {loginState === '2fa-email' && render2FAEmail()}
-            {loginState === '2fa-totp' && render2FATOTP()}
-            {loginState === '2fa-setup' && render2FASetup()}
+            {loginState === "initial" && renderInitialLogin()}
+            {loginState === "2fa-email" && render2FAEmail()}
+            {loginState === "2fa-totp" && render2FATOTP()}
+            {loginState === "2fa-setup" && render2FASetup()}
           </div>
         </div>
       </div>

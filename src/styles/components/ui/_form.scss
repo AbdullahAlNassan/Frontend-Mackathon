@@ -1,0 +1,60 @@
+.form {
+  width: 100%;
+  
+  &--spacing-sm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+  
+  &--spacing-md {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+  }
+  
+  &--spacing-lg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-20);
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  
+  &__label {
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    font-weight: 500;
+  }
+  
+  &__required {
+    color: var(--color-error);
+    margin-left: var(--space-4);
+  }
+  
+  &__control {
+    width: 100%;
+  }
+  
+  &__helper {
+    font-size: var(--fs-sm);
+    color: var(--color-muted);
+  }
+  
+  &__error {
+    font-size: var(--fs-sm);
+    color: var(--color-error);
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    
+    &::before {
+      content: "⚠️";
+      font-size: var(--fs-md);
+    }
+  }
+}
