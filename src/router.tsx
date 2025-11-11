@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
 import PlaceholderPage from "./pages/Placeholder/PlaceholderPage";
 import LoginPage from "./pages/Login/LoginPage";
-import TwoFactorEmailPage from "./pages/Login/TwoFactorEmailPage"; // ← Nieuwe import
 
 export const router = createBrowserRouter([
   {
@@ -17,11 +16,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/login", 
+    path: "/inloggen", // Voor backend redirect compatibility
     element: <LoginPage />,
-  },
-  {
-    path: "/two-factor/email", // ← Nieuwe route
-    element: <TwoFactorEmailPage />,
   },
 ]);
