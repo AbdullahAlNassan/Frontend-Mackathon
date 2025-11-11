@@ -1,12 +1,17 @@
+/* ===== Sticky Header ===== */
 .header {
   grid-area: header;
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-12);
-  padding: var(--space-16) var(--space-24);
+  padding: calc(env(safe-area-inset-top) + 10px) var(--space-24) 10px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
+  backdrop-filter: saturate(120%) blur(6px);
 
   &__left,
   &__right {
@@ -19,17 +24,17 @@
   }
   &__brand {
     font-weight: 700;
+    letter-spacing: 0.2px;
   }
 
-  /* menu-knop alleen op mobiel */
   &__menu-btn {
-    @media (min-width: 768px) {
+    @media (min-width: 1024px) {
       display: none;
     }
   }
 }
 
-/* header knoppen */
+/* header buttons */
 .toggle,
 .time,
 .logout {
@@ -39,13 +44,21 @@
   background: transparent;
   color: var(--color-text);
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 120ms ease, background-color 120ms ease;
 
   &:hover {
     border-color: var(--color-primary);
   }
 }
 .toggle--active {
-  background: rgba(79, 124, 255, 0.12);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
   border-color: var(--color-primary);
+}
+
+/* mobiel: verberg toggles & tijd, laat logout staan */
+@media (max-width: 767px) {
+  .header__right .toggle,
+  .header__right .time {
+    display: none;
+  }
 }

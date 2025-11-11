@@ -1,0 +1,38 @@
+/* ─────────────── Leaflet map styles ─────────────── */
+.map {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+
+  /* Zorg dat de leaflet-container altijd 100% vult */
+  .leaflet-container {
+    width: 100%;
+    height: 100%;
+    font-family: inherit;
+    background: #f8f9fa;
+  }
+
+  /* Zoomknoppen iets moderner maken */
+  .leaflet-control-zoom {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Popup tekst iets beter leesbaar */
+  .leaflet-popup-content {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-text);
+  }
+
+  /* Tooltips */
+  .leaflet-tooltip {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+  }
+}
