@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Input, Checkbox, Loader, PageLoader } from "../../components/ui";
+import type { LoginResponse, User } from "../../types/auth";
 
 type LoginError = {
   email?: string;
@@ -21,7 +22,24 @@ export default function LoginPage() {
   const [countdown, setCountdown] = useState(0);
   const [errors, setErrors] = useState<LoginError>({});
   const [loginState, setLoginState] = useState<LoginState>('initial');
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
+
+  // Countdown voor resend
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  // Auto-focus eerste input bij 2FA
+  useEffect(() => {
+    if (loginState === '2fa-email' || loginState === '2fa-totp') {
+      const firstInput = document.getElementById("code-0");
+      firstInput?.focus();
+    }
+  }, [loginState]);
 
   // Simuleer backend response
   const simulateBackendLogin = (email: string, password: string) => {
@@ -34,6 +52,21 @@ export default function LoginPage() {
     ];
     
     return scenarios[Math.floor(Math.random() * scenarios.length)];
+  };
+
+  // Simuleer backend 2FA verificatie response
+  const simulate2FAVerification = (code: string): LoginResponse => {
+    if (code === "000000") {
+      throw new Error("Onjuiste verificatiecode");
+    }
+
+    return {
+      success: true,
+      message: "Login completed successfully",
+      userId: "user-123",
+      User: email,
+      Role: "user"
+    };
   };
 
   // Handle backend response
@@ -95,17 +128,40 @@ export default function LoginPage() {
 
     // Simuleer 2FA verificatie
     setTimeout(() => {
-      setIsLoading(false);
-
-      if (fullCode === "000000") {
-        setErrors({ code: "Onjuiste verificatiecode" });
+      try {
+        const response: LoginResponse = simulate2FAVerification(fullCode);
+        
+        if (response.success) {
+          // Opslaan user data
+          setUser({
+            id: response.userId,
+            username: response.User,
+            role: response.Role
+          });
+          
+          setIsLoading(false);
+          setLoginState('success');
+          
+          // Redirect naar dashboard met user data
+          setTimeout(() => {
+            navigate("/dashboard", { 
+              state: { 
+                user: {
+                  id: response.userId,
+                  username: response.User,
+                  role: response.Role
+                }
+              }
+            });
+          }, 1000);
+        }
+      } catch (error: any) {
+        setIsLoading(false);
+        setErrors({ code: error.message });
         setCode(["", "", "", "", "", ""]);
-        return;
+        const firstInput = document.getElementById("code-0");
+        firstInput?.focus();
       }
-
-      // Succesvolle 2FA
-      setLoginState('success');
-      setTimeout(() => navigate("/dashboard"), 1000);
     }, 1500);
   };
 
@@ -117,6 +173,8 @@ export default function LoginPage() {
       setCountdown(30);
       setCode(["", "", "", "", "", ""]);
       setErrors({});
+      const firstInput = document.getElementById("code-0");
+      firstInput?.focus();
     }, 1000);
   };
 
@@ -150,14 +208,6 @@ export default function LoginPage() {
       prevInput?.focus();
     }
   };
-
-  // Countdown voor resend
-  useState(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  });
 
   // Render verschillende states
   const renderInitialLogin = () => (
@@ -299,8 +349,49 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Vergelijkbaar met email 2FA maar zonder resend optie */}
-      {render2FAEmail()}
+      {errors.code && (
+        <div className="login-page__error-banner" role="alert">
+          ⚠️ {errors.code}
+        </div>
+      )}
+
+      <form className="login-page__form" onSubmit={handle2FASubmit}>
+        <div className="login-page__code-section">
+          <label className="login-page__code-label">
+            Voer de 6-cijferige code in:
+          </label>
+          <div className="login-page__code-inputs">
+            {code.map((digit, index) => (
+              <Input
+                key={index}
+                id={`code-${index}`}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleCodeChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="login-page__code-input"
+                autoFocus={index === 0}
+                disabled={isLoading}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="login-page__actions">
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={isLoading}
+            disabled={isLoading || code.join("").length !== 6}
+            className="login-page__submit"
+          >
+            {isLoading ? "Verifiëren..." : "Verifieer"}
+          </Button>
+        </div>
+      </form>
     </>
   );
 
