@@ -62,12 +62,6 @@
     width: 100%;
   }
 
-  &__options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
   &__submit {
     width: 100%;
     margin-top: var(--space-16);
@@ -109,7 +103,6 @@
     }
 
     &[type="number"] {
-      appearance: textfield;
       -moz-appearance: textfield;
     }
   }
@@ -124,17 +117,67 @@
     width: 100%;
   }
 
-  // 2FA Setup
-  &__setup-options {
+  // MFA Setup Styles
+  &__setup-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+  }
+
+  &__qr-section {
     text-align: center;
+  }
+
+  &__qr-placeholder {
+    background: var(--color-bg);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-32);
+    margin-bottom: var(--space-16);
+  }
+
+  &__qr-code {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    margin: 0 auto var(--space-16) auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--color-muted);
+  }
+
+  &__setup-steps {
+    text-align: left;
     
-    p {
-      margin-bottom: var(--space-16);
+    h3 {
+      margin-bottom: var(--space-12);
       color: var(--color-text);
     }
   }
 
-  &__setup-buttons {
+  &__steps-list {
+    margin: 0;
+    padding-left: var(--space-20);
+    color: var(--color-muted);
+    
+    li {
+      margin-bottom: var(--space-8);
+      line-height: 1.5;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &__setup-actions {
     display: flex;
     flex-direction: column;
     gap: var(--space-12);
@@ -175,6 +218,11 @@
       width: 44px !important;
       height: 52px;
       font-size: var(--fs-lg);
+    }
+
+    &__qr-code {
+      width: 150px;
+      height: 150px;
     }
   }
 }

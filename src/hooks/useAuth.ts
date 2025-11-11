@@ -24,12 +24,18 @@ export const useAuth = () => {
   
   const navigate = useNavigate();
 
-  // Simuleer backend response
+  // Simuleer backend response - CORRECTIE: setup2fa alleen voor MFA
   const simulateBackendLogin = useCallback((email: string, password: string) => {
     const scenarios = [
+      // Email 2FA - directe challenge, geen setup nodig
       { status: "success", redirectUrl: "/inloggen?challenge=email", method: "email" },
+      // TOTP MFA - directe challenge, geen setup nodig  
       { status: "success", redirectUrl: "/inloggen?challenge=totp", method: "mfa" },
-      { status: "success", redirectUrl: "/inloggen?setup2fa=true&username=" + encodeURIComponent(email), method: "email" },
+      // MFA Setup - alleen voor TOTP wanneer gebruiker nog geen MFA heeft
+      { status: "success", redirectUrl: "/inloggen?setup2fa=true&username=" + encodeURIComponent(email), method: "mfa" },
+      // Directe login (geen 2FA)
+      { status: "success", redirectUrl: "/dashboard", method: "direct" },
+      // Error case
       { status: "error", message: "Onjuiste inloggegevens" }
     ];
     
@@ -51,10 +57,17 @@ export const useAuth = () => {
     };
   }, []);
 
-  // Handle backend response
+  // Handle backend response - CORRECTIE: setup2fa alleen voor MFA
   const handleBackendResponse = useCallback((response: any) => {
     if (response.status === "error") {
       setErrors({ general: response.message });
+      return;
+    }
+
+    // Directe redirect naar dashboard
+    if (response.redirectUrl === "/dashboard") {
+      setLoginState('success');
+      setTimeout(() => navigate("/dashboard"), 1000);
       return;
     }
 
@@ -65,10 +78,8 @@ export const useAuth = () => {
     } else if (url.searchParams.get('challenge') === 'totp') {
       setLoginState('2fa-totp');
     } else if (url.searchParams.get('setup2fa') === 'true') {
+      // SETUP2FA ALLEEN VOOR MFA (TOTP) - geen email setup!
       setLoginState('2fa-setup');
-    } else {
-      setLoginState('success');
-      navigate("/dashboard");
     }
   }, [navigate]);
 

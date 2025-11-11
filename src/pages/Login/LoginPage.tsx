@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useAuth, useCountdown, useAutoFocus } from "../../hooks";
 import { Button, Input, Form, FormField, Loader, PageLoader } from "../../components/ui";
 
@@ -24,17 +25,14 @@ export default function LoginPage() {
   const { countdown, startCountdown } = useCountdown();
   const firstInputRef = useAutoFocus(loginState === '2fa-email' || loginState === '2fa-totp');
 
-  // Enhanced resend code with countdown
   const handleResendWithCountdown = async () => {
     await handleResendCode();
     startCountdown(30);
   };
 
-  // Enhanced code change with auto-submit
   const handleCodeChangeWithSubmit = (index: number, value: string) => {
     handleCodeChange(index, value);
     
-    // Auto-submit bij laatste karakter
     if (index === 5 && value) {
       const newCode = [...code];
       newCode[index] = value;
@@ -47,9 +45,7 @@ export default function LoginPage() {
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
-      // Focus vorige input bij backspace
-      const prevInput = document.getElementById(`code-${index - 1}`);
-      prevInput?.focus();
+      // Focus zal nu via refs worden gedaan
     }
   };
 
@@ -128,7 +124,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <Form onSubmit={handle2FASubmit} className="login-page__form">
+      <Form onSubmit={handle2FASubmit} spacing="md">
         <div className="login-page__code-section">
           <label className="login-page__code-label">
             Voer de 6-cijferige code in:
@@ -137,7 +133,7 @@ export default function LoginPage() {
             {code.map((digit, index) => (
               <Input
                 key={index}
-                id={`code-${index}`}
+                ref={index === 0 ? firstInputRef : undefined}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -146,9 +142,7 @@ export default function LoginPage() {
                 onChange={(e) => handleCodeChangeWithSubmit(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="login-page__code-input"
-                autoFocus={index === 0}
                 disabled={isLoading}
-                ref={index === 0 ? firstInputRef : undefined}
               />
             ))}
           </div>
@@ -201,7 +195,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <Form onSubmit={handle2FASubmit} className="login-page__form">
+      <Form onSubmit={handle2FASubmit} spacing="md">
         <div className="login-page__code-section">
           <label className="login-page__code-label">
             Voer de 6-cijferige code in:
@@ -210,7 +204,7 @@ export default function LoginPage() {
             {code.map((digit, index) => (
               <Input
                 key={index}
-                id={`code-${index}`}
+                ref={index === 0 ? firstInputRef : undefined}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -219,9 +213,7 @@ export default function LoginPage() {
                 onChange={(e) => handleCodeChangeWithSubmit(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="login-page__code-input"
-                autoFocus={index === 0}
                 disabled={isLoading}
-                ref={index === 0 ? firstInputRef : undefined}
               />
             ))}
           </div>
@@ -242,42 +234,51 @@ export default function LoginPage() {
     </>
   );
 
+  // CORRECTIE: 2FA setup is alleen voor MFA (TOTP) - geen email optie
   const render2FASetup = () => (
     <>
       <div className="login-page__header">
-        <h1 className="login-page__title">2FA Instellen</h1>
+        <h1 className="login-page__title">MFA Instellen</h1>
         <p className="login-page__subtitle">
-          Stel twee-factor authenticatie in voor <strong>{email}</strong>
+          Stel Multi-Factor Authenticatie in voor <strong>{email}</strong>
         </p>
       </div>
 
-      <div className="login-page__setup-options">
-        <p>Kies je 2FA methode:</p>
-        <div className="login-page__setup-buttons">
+      <div className="login-page__setup-content">
+        <div className="login-page__qr-section">
+          <div className="login-page__qr-placeholder">
+            <div className="login-page__qr-code">QR CODE</div>
+            <p>Scan deze QR code met je authenticator app</p>
+          </div>
+        </div>
+
+        <div className="login-page__setup-steps">
+          <h3>Stappen:</h3>
+          <ol className="login-page__steps-list">
+            <li>Open je authenticator app (Google Authenticator, Authy, etc.)</li>
+            <li>Scan de QR code hierboven</li>
+            <li>Voer de 6-cijferige code in om te verifiëren</li>
+          </ol>
+        </div>
+
+        <div className="login-page__setup-actions">
           <Button 
             variant="primary" 
             onClick={() => setLoginState('2fa-totp')}
-            className="login-page__setup-btn"
           >
-            Authenticator App
+            Ik heb de QR code gescand
           </Button>
+          
           <Button 
             variant="ghost" 
             onClick={() => {
-              setErrors({ general: "Email 2FA heeft geen setup nodig" });
               setLoginState('initial');
+              setErrors({});
             }}
-            className="login-page__setup-btn"
           >
-            Terug naar Login
+            Later instellen
           </Button>
         </div>
-      </div>
-
-      <div className="login-page__help">
-        <p className="login-page__help-text">
-          💡 <strong>Authenticator App:</strong> Scan de QR code met apps zoals Google Authenticator, Authy of Microsoft Authenticator.
-        </p>
       </div>
     </>
   );
