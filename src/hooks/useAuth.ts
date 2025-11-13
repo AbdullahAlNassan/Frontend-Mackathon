@@ -24,28 +24,51 @@ export const useAuth = () => {
   
   const navigate = useNavigate();
 
-  // Gebruik useCodeInput hook ipv eigen state management
+  // Gebruik verbeterde useCodeInput hook
   const {
     code,
-    setCode,
     setInputRef,
     handleCodeChange,
     handleKeyDown,
+    handlePaste,
+    handleFocus,
     resetCode,
-    setFocusToFirst
-  } = useCodeInput(6);
+    setFocusToFirst,
+    isCodeComplete
+  } = useCodeInput({
+    length: 6,
+    onComplete: (fullCode) => {
+      // Auto-submit wanneer code compleet is
+      handle2FASubmit(fullCode);
+    },
+    autoFocus: loginState === '2fa-email' || loginState === '2fa-totp'
+  });
 
-  // Simuleer backend response
+  // Simuleer backend response - setup2fa ALLEEN voor MFA
   const simulateBackendLogin = useCallback((email: string, password: string) => {
+    // Bepaal scenario op basis van email voor consistente testing
+    const emailHash = email.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
     const scenarios = [
+      // Email 2FA - directe challenge, geen setup nodig
       { status: "success", redirectUrl: "/inloggen?challenge=email", method: "email" },
+      // TOTP MFA - directe challenge, geen setup nodig  
       { status: "success", redirectUrl: "/inloggen?challenge=totp", method: "mfa" },
+      // MFA Setup - ALLEEN voor TOTP wanneer gebruiker nog geen MFA heeft
+      // Deze wordt alleen getriggerd voor specifieke emails om te testen
       { status: "success", redirectUrl: "/inloggen?setup2fa=true&username=" + encodeURIComponent(email), method: "mfa" },
+      // Directe login (geen 2FA)
       { status: "success", redirectUrl: "/dashboard", method: "direct" },
+      // Error case
       { status: "error", message: "Onjuiste inloggegevens" }
     ];
     
-    return scenarios[Math.floor(Math.random() * scenarios.length)];
+    // Gebruik email hash voor consistente scenario selectie
+    const scenarioIndex = Math.abs(emailHash) % scenarios.length;
+    return scenarios[scenarioIndex];
   }, []);
 
   // Simuleer backend 2FA verificatie response
@@ -63,7 +86,7 @@ export const useAuth = () => {
     };
   }, []);
 
-  // Handle backend response
+  // Handle backend response - setup2fa ALLEEN voor MFA
   const handleBackendResponse = useCallback((response: any) => {
     if (response.status === "error") {
       setErrors({ general: response.message });
@@ -79,16 +102,17 @@ export const useAuth = () => {
     const url = new URL(response.redirectUrl, window.location.origin);
     
     if (url.searchParams.get('challenge') === 'email') {
+      // Email 2FA - directe verificatie
       setLoginState('2fa-email');
-      // Focus eerste input wanneer 2FA scherm wordt getoond
-      setTimeout(() => setFocusToFirst(), 100);
     } else if (url.searchParams.get('challenge') === 'totp') {
+      // TOTP MFA - directe verificatie
       setLoginState('2fa-totp');
-      setTimeout(() => setFocusToFirst(), 100);
     } else if (url.searchParams.get('setup2fa') === 'true') {
+      // MFA Setup - ALLEEN voor TOTP (authenticator app)
+      // Dit is NOOIT voor email 2FA
       setLoginState('2fa-setup');
     }
-  }, [navigate, setFocusToFirst]);
+  }, [navigate]);
 
   // Initial login
   const handleInitialLogin = useCallback(async (e: React.FormEvent) => {
@@ -112,7 +136,7 @@ export const useAuth = () => {
     }, 1500);
   }, [email, password, simulateBackendLogin, handleBackendResponse]);
 
-  // 2FA code verification
+  // 2FA code verification - voor zowel email als TOTP
   const handle2FASubmit = useCallback(async (codeToVerify?: string) => {
     const fullCode = codeToVerify || code.join("");
     
@@ -152,26 +176,23 @@ export const useAuth = () => {
       } catch (error: any) {
         setIsLoading(false);
         setErrors({ code: error.message });
-        resetCode(); // Reset code met proper hook
+        resetCode();
       }
     }, 1500);
   }, [code, email, simulate2FAVerification, navigate, resetCode]);
 
-  // Resend 2FA code
+  // Resend 2FA code - ALLEEN voor email 2FA
   const handleResendCode = useCallback(async () => {
+    if (loginState !== '2fa-email') return;
+    
     setIsResending(true);
     setTimeout(() => {
       setIsResending(false);
       setCountdown(30);
-      resetCode(); // Reset code met proper hook
+      resetCode();
       setErrors({});
     }, 1000);
-  }, [resetCode]);
-
-  // Auto-submit handler voor useCodeInput
-  const handleAutoSubmit = useCallback((fullCode: string) => {
-    handle2FASubmit(fullCode);
-  }, [handle2FASubmit]);
+  }, [loginState, resetCode]);
 
   // Clear errors
   const clearErrors = useCallback(() => {
@@ -182,7 +203,7 @@ export const useAuth = () => {
   const resetForm = useCallback(() => {
     setEmail("");
     setPassword("");
-    resetCode(); // Reset code met proper hook
+    resetCode();
     setErrors({});
     setLoginState('initial');
   }, [resetCode]);
@@ -200,12 +221,14 @@ export const useAuth = () => {
     errors,
     loginState,
     user,
+    isCodeComplete,
     
     // Refs en code handlers
     setInputRef,
-    handleCodeChange: (index: number, value: string) => 
-      handleCodeChange(index, value, handleAutoSubmit),
+    handleCodeChange,
     handleKeyDown,
+    handlePaste,
+    handleFocus,
     
     // Actions
     handleInitialLogin,

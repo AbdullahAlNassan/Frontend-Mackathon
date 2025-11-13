@@ -15,11 +15,14 @@ export default function LoginPage() {
     setInputRef,
     handleCodeChange,
     handleKeyDown,
+    handlePaste,
+    handleFocus,
     handleInitialLogin,
     handle2FASubmit,
     handleResendCode,
     setLoginState,
-    setErrors
+    setErrors,
+    isCodeComplete
   } = useAuth();
 
   const { countdown, startCountdown } = useCountdown();
@@ -91,13 +94,23 @@ export default function LoginPage() {
           {isLoading ? "Inloggen..." : "Inloggen"}
         </Button>
       </Form>
+
+      {/* Demo hints */}
+      <div className="login-page__demo-hint">
+        <p><strong>Demo accounts:</strong></p>
+        <ul>
+          <li>Elke email werkt</li>
+          <li>setup2fa scenario: gebruik "mfa@voorbeeld.nl"</li>
+          <li>Foute code: gebruik "000000"</li>
+        </ul>
+      </div>
     </>
   );
 
   const render2FAEmail = () => (
     <>
       <div className="login-page__header">
-        <h1 className="login-page__title">Beveiligingsverificatie</h1>
+        <h1 className="login-page__title">E-mail Verificatie</h1>
         <p className="login-page__subtitle">
           We hebben een verificatiecode gestuurd naar <strong>{email}</strong>
         </p>
@@ -126,10 +139,16 @@ export default function LoginPage() {
                 value={digit}
                 onChange={(e) => handleCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={(e) => handlePaste(e, index)}
+                onFocus={() => handleFocus(index)}
                 className="login-page__code-input"
                 disabled={isLoading}
+                aria-label={`Cijfer ${index + 1} van 6`}
               />
             ))}
+          </div>
+          <div className="login-page__code-hint">
+            💡 Tip: Je kunt de code ook plakken (Ctrl+V)
           </div>
         </div>
 
@@ -138,7 +157,7 @@ export default function LoginPage() {
             type="submit"
             variant="primary"
             isLoading={isLoading}
-            disabled={isLoading || code.join("").length !== 6}
+            disabled={isLoading || !isCodeComplete}
             className="login-page__submit"
           >
             {isLoading ? "Verifiëren..." : "Verifieer"}
@@ -168,7 +187,7 @@ export default function LoginPage() {
   const render2FATOTP = () => (
     <>
       <div className="login-page__header">
-        <h1 className="login-page__title">Authenticator Verificatie</h1>
+        <h1 className="login-page__title">Authenticator App</h1>
         <p className="login-page__subtitle">
           Voer de code in van je authenticator app
         </p>
@@ -197,10 +216,16 @@ export default function LoginPage() {
                 value={digit}
                 onChange={(e) => handleCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
+                onPaste={(e) => handlePaste(e, index)}
+                onFocus={() => handleFocus(index)}
                 className="login-page__code-input"
                 disabled={isLoading}
+                aria-label={`Cijfer ${index + 1} van 6`}
               />
             ))}
+          </div>
+          <div className="login-page__code-hint">
+            💡 Tip: Je kunt de code ook plakken (Ctrl+V)
           </div>
         </div>
 
@@ -209,7 +234,7 @@ export default function LoginPage() {
             type="submit"
             variant="primary"
             isLoading={isLoading}
-            disabled={isLoading || code.join("").length !== 6}
+            disabled={isLoading || !isCodeComplete}
             className="login-page__submit"
           >
             {isLoading ? "Verifiëren..." : "Verifieer"}
@@ -219,38 +244,54 @@ export default function LoginPage() {
     </>
   );
 
+  // MFA SETUP - ALLEEN voor TOTP (authenticator app), NOOIT voor email
   const render2FASetup = () => (
     <>
       <div className="login-page__header">
-        <h1 className="login-page__title">MFA Instellen</h1>
+        <h1 className="login-page__title">Authenticator App Instellen</h1>
         <p className="login-page__subtitle">
-          Stel Multi-Factor Authenticatie in voor <strong>{email}</strong>
+          Stel je authenticator app in voor <strong>{email}</strong>
+        </p>
+        <p className="login-page__setup-info">
+          🔒 <strong>Multi-Factor Authenticatie (MFA)</strong> voegt een extra beveiligingslaag toe met je authenticator app.
         </p>
       </div>
 
       <div className="login-page__setup-content">
         <div className="login-page__qr-section">
           <div className="login-page__qr-placeholder">
-            <div className="login-page__qr-code">QR CODE</div>
+            <div className="login-page__qr-code">
+              <div className="login-page__qr-placeholder-text">
+                QR Code
+                <br />
+                <small>(Placeholder voor demo)</small>
+              </div>
+            </div>
             <p>Scan deze QR code met je authenticator app</p>
           </div>
         </div>
 
         <div className="login-page__setup-steps">
-          <h3>Stappen:</h3>
+          <h3>Stappen om in te stellen:</h3>
           <ol className="login-page__steps-list">
-            <li>Open je authenticator app (Google Authenticator, Authy, etc.)</li>
-            <li>Scan de QR code hierboven</li>
-            <li>Voer de 6-cijferige code in om te verifiëren</li>
+            <li><strong>Download een authenticator app</strong> zoals Google Authenticator, Authy, of Microsoft Authenticator</li>
+            <li><strong>Scan de QR code</strong> hierboven met je app</li>
+            <li><strong>Voer de 6-cijferige code</strong> in die je app genereert</li>
           </ol>
+          
+          <div className="login-page__manual-setup">
+            <h4>Handmatig instellen:</h4>
+            <p>Secret key: <code>JBSWY3DPEHPK3PXP</code></p>
+          </div>
         </div>
 
         <div className="login-page__setup-actions">
           <Button 
             variant="primary" 
             onClick={() => setLoginState('2fa-totp')}
+            className="login-page__setup-continue"
           >
-            Ik heb de QR code gescand
+            ✅ Ik heb mijn authenticator app ingesteld
           </Button>
           
           <Button 
@@ -259,8 +300,9 @@ export default function LoginPage() {
               setLoginState('initial');
               setErrors({});
             }}
+            className="login-page__setup-skip"
           >
-            Later instellen
+            ⏭️ MFA later instellen
           </Button>
         </div>
       </div>
