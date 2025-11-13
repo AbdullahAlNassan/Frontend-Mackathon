@@ -1,5 +1,5 @@
 import { useAuth, useCountdown } from "../../hooks";
-import { Button, Input, Form, FormField, Loader, PageLoader } from "../../components/ui";
+import { Button, Input, Form, FormField, PageLoader } from "../../components/ui";
 
 export default function LoginPage() {
   const {

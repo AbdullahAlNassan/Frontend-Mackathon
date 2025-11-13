@@ -33,7 +33,6 @@ export const useAuth = () => {
     handlePaste,
     handleFocus,
     resetCode,
-    setFocusToFirst,
     isCodeComplete
   } = useCodeInput({
     length: 6,
@@ -45,7 +44,7 @@ export const useAuth = () => {
   });
 
   // Simuleer backend response - setup2fa ALLEEN voor MFA
-  const simulateBackendLogin = useCallback((email: string, password: string) => {
+  const simulateBackendLogin = useCallback((email: string) => {
     // Bepaal scenario op basis van email voor consistente testing
     const emailHash = email.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
@@ -131,7 +130,7 @@ export const useAuth = () => {
 
     setTimeout(() => {
       setIsLoading(false);
-      const response = simulateBackendLogin(email, password);
+  const response = simulateBackendLogin(email);
       handleBackendResponse(response);
     }, 1500);
   }, [email, password, simulateBackendLogin, handleBackendResponse]);
