@@ -47,7 +47,7 @@ export default function LoginPage() {
 
       {errors.general && (
         <div className="login-page__error-banner" role="alert">
-          ⚠️ {errors.general}
+          {errors.general}
         </div>
       )}
       
@@ -118,7 +118,7 @@ export default function LoginPage() {
 
       {errors.code && (
         <div className="login-page__error-banner" role="alert">
-          ⚠️ {errors.code}
+          {errors.code}
         </div>
       )}
 
@@ -148,7 +148,7 @@ export default function LoginPage() {
             ))}
           </div>
           <div className="login-page__code-hint">
-            💡 Tip: Je kunt de code ook plakken (Ctrl+V)
+            Tip: Je kunt de code ook plakken (Ctrl+V)
           </div>
         </div>
 
@@ -178,7 +178,7 @@ export default function LoginPage() {
 
       <div className="login-page__help">
         <p className="login-page__help-text">
-          💡 <strong>Tip:</strong> Check je spam folder als je de e-mail niet kunt vinden.
+          <strong>Tip:</strong> Check je spam folder als je de e-mail niet kunt vinden.
         </p>
       </div>
     </>
@@ -195,7 +195,7 @@ export default function LoginPage() {
 
       {errors.code && (
         <div className="login-page__error-banner" role="alert">
-          ⚠️ {errors.code}
+          {errors.code}
         </div>
       )}
 
@@ -225,7 +225,7 @@ export default function LoginPage() {
             ))}
           </div>
           <div className="login-page__code-hint">
-            💡 Tip: Je kunt de code ook plakken (Ctrl+V)
+            Tip: Je kunt de code ook plakken (Ctrl+V)
           </div>
         </div>
 
@@ -253,7 +253,7 @@ export default function LoginPage() {
           Stel je authenticator app in voor <strong>{email}</strong>
         </p>
         <p className="login-page__setup-info">
-          🔒 <strong>Multi-Factor Authenticatie (MFA)</strong> voegt een extra beveiligingslaag toe met je authenticator app.
+          <strong>Multi-Factor Authenticatie (MFA)</strong> voegt een extra beveiligingslaag toe met je authenticator app.
         </p>
       </div>
 
@@ -291,7 +291,7 @@ export default function LoginPage() {
             onClick={() => setLoginState('2fa-totp')}
             className="login-page__setup-continue"
           >
-            ✅ Ik heb mijn authenticator app ingesteld
+            Ik heb mijn authenticator app ingesteld
           </Button>
           
           <Button 
@@ -302,7 +302,7 @@ export default function LoginPage() {
             }}
             className="login-page__setup-skip"
           >
-            ⏭️ MFA later instellen
+            MFA later instellen
           </Button>
         </div>
       </div>
