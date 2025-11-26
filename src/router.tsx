@@ -5,6 +5,9 @@ import DashboardPage from "./pages/Dashboard/DashboardPage";
 
 export const router = createBrowserRouter([
   {
-    children: [{ index: true, element: <DashboardPage /> }],
+    children: [
+      { index: true, element: <DashboardPage /> },
+      { path: "test", element: <PlaceholderPage /> },
+    ],
   },
 ]);

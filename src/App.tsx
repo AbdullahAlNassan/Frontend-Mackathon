@@ -1,4 +1,5 @@
 import Layout from "./components/Layout/Layout";
+import "leaflet/dist/leaflet.css";
 export default function App() {
   return (
     <Layout>

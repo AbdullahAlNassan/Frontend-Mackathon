@@ -1,17 +1,22 @@
-/* ===== Sticky Header ===== */
+/* ===== Header ===== */
 .header {
   grid-area: header;
   position: sticky;
   top: 0;
   z-index: 40;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
-  padding: calc(env(safe-area-inset-top) + 10px) var(--space-24) 10px;
+  gap: var(--space-16);
+  padding: var(--space-12) var(--space-16);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
   backdrop-filter: saturate(120%) blur(6px);
+  min-height: 56px;
+
+  @media (min-width: 1024px) {
+    padding: var(--space-12) var(--space-24);
+  }
 
   &__left,
   &__right {
@@ -19,46 +24,207 @@
     align-items: center;
     gap: var(--space-12);
   }
-  &__logo {
-    font-size: 20px;
-  }
-  &__brand {
-    font-weight: 700;
-    letter-spacing: 0.2px;
+
+  /* Hamburger menu button - override Button styles */
+  &__menu-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    min-width: 40px;
+    font-size: 1.5rem;
+    border-radius: var(--radius-sm) !important;
+
+    // Verberg button tekst/content, alleen icon
+    .button__content {
+      display: none;
+    }
+
+    .button__icon--left {
+      margin: 0;
+    }
+
+    @media (min-width: 1024px) {
+      display: none !important;
+    }
   }
 
-  &__menu-btn {
-    @media (min-width: 1024px) {
+  &__logo-group {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(250, 235, 215, 0.9)
+    );
+    display: flex;
+    align-items: center;
+    gap: var(--space-10);
+    padding: var(--space-10) var(--space-20);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__logo-img {
+    width: 135px;
+    height: 34px;
+    object-fit: contain;
+  }
+
+  &__brand {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--color-text);
+
+    @media (max-width: 480px) {
       display: none;
     }
   }
 }
 
-/* header buttons */
-.toggle,
-.time,
-.logout {
-  padding: 8px 12px;
+/* ===== Toggle Switch ===== */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  user-select: none;
+
+  &__label {
+    font-size: 0.875rem;
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  &__slider {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    background: var(--color-border);
+    border-radius: 24px;
+    transition: background-color 200ms ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 200ms ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  input[type="checkbox"]:checked + &__slider {
+    background: var(--color-primary);
+  }
+
+  input[type="checkbox"]:checked + &__slider::before {
+    transform: translateX(20px);
+  }
+
+  &:hover &__slider {
+    opacity: 0.9;
+  }
+
+  input[type="checkbox"]:focus + &__slider {
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+}
+
+/* ===== Header Controls ===== */
+.time-select,
+.time {
+  padding: var(--space-8) var(--space-12);
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text);
+  font-size: 0.875rem;
+  transition: all 150ms ease;
+}
+
+.time-select {
   cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease;
 
   &:hover {
     border-color: var(--color-primary);
   }
-}
-.toggle--active {
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-  border-color: var(--color-primary);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-primary) 10%, transparent);
+  }
 }
 
-/* mobiel: verberg toggles & tijd, laat logout staan */
+.time {
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* Logout button - override Button styles */
+.logout {
+  padding: var(--space-8) var(--space-12) !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  transition: all 150ms ease !important;
+  gap: var(--space-6) !important;
+
+  &:hover {
+    border-color: var(--color-primary) !important;
+    background: color-mix(
+      in srgb,
+      var(--color-primary) 5%,
+      transparent
+    ) !important;
+    color: var(--color-primary) !important;
+  }
+
+  .button__icon--left {
+    margin: 0;
+  }
+
+  .button__icon--left svg {
+    font-size: 1.125rem;
+  }
+
+  .button__content {
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
+}
+
+/* Responsive: verberg desktop controls op mobiel */
 @media (max-width: 767px) {
-  .header__right .toggle,
-  .header__right .time {
+  .header__right .toggle-switch,
+  .header__right .time,
+  .header__right .time-select {
     display: none;
   }
 }

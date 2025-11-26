@@ -1,3 +1,9 @@
+import { GoContainer } from "react-icons/go";
+import { IoMdSettings } from "react-icons/io";
+import { HiOutlineDocumentText, HiOutlineChartBar } from "react-icons/hi";
+import { FiUser } from "react-icons/fi";
+import { MdColorLens } from "react-icons/md";
+
 type SidebarProps = {
   id: string;
   open: boolean;
@@ -5,7 +11,6 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ id, open, onClose }: SidebarProps) {
-  // ESC sluit het menu op mobiel
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape" && open) onClose?.();
   }
@@ -18,30 +23,57 @@ export default function Sidebar({ id, open, onClose }: SidebarProps) {
       onKeyDown={onKeyDown}
     >
       <nav aria-label="Primaire navigatie" className="sidebar__nav">
+        {/* Container dropdown */}
         <details className="dropdown" open>
-          <summary className="dropdown__summary">container</summary>
-          <div className="dropdown__list" role="list">
+          <summary className="dropdown__summary">
+            <GoContainer className="dropdown__icon" />
+            <span className="dropdown__title">Container</span>
+            <span className="dropdown__arrow">›</span>
+          </summary>
+          <div className="dropdown__content">
             <a className="dropdown__item" href="#">
-              overview
+              <HiOutlineChartBar className="dropdown__item-icon" />
+              Overview
             </a>
             <a className="dropdown__item" href="#">
-              logs
+              <HiOutlineDocumentText className="dropdown__item-icon" />
+              Logs
             </a>
           </div>
         </details>
 
+        {/* Settings dropdown */}
         <details className="dropdown">
-          <summary className="dropdown__summary">settings</summary>
-          <div className="dropdown__list" role="list">
+          <summary className="dropdown__summary">
+            <IoMdSettings className="dropdown__icon" />
+            <span className="dropdown__title">Settings</span>
+            <span className="dropdown__arrow">›</span>
+          </summary>
+          <div className="dropdown__content">
             <a className="dropdown__item" href="#">
-              profile
+              <FiUser className="dropdown__item-icon" />
+              Profile
             </a>
             <a className="dropdown__item" href="#">
-              preferences
+              <MdColorLens className="dropdown__item-icon" />
+              Preferences
             </a>
           </div>
         </details>
       </nav>
+
+      {/* optinial if we want to add email and profile info to the down . */}
+      <div className="sidebar__footer">
+        <div className="sidebar__user">
+          <div className="sidebar__user-avatar">
+            <FiUser />
+          </div>
+          <div className="sidebar__user-info">
+            <div className="sidebar__user-name">Admin User</div>
+            <div className="sidebar__user-email">admin@example.com</div>
+          </div>
+        </div>
+      </div>
     </aside>
   );
 }
