@@ -33,13 +33,8 @@ export default function Button({
       disabled={isLoading || disabled}
       aria-busy={isLoading || undefined}
     >
-      {isLoading ? (
-        <span className="button__spinner" aria-hidden>
-          ⏳
-        </span>
-      ) : (
-        children
-      )}
+      {isLoading && <span className="button__spinner" aria-hidden />}
+      {children}
     </button>
   );
 }

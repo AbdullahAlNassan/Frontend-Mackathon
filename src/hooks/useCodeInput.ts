@@ -1,4 +1,11 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  type ClipboardEvent,
+  type KeyboardEvent,
+} from "react";
 
 type UseCodeInputProps = {
   length?: number;
@@ -6,196 +13,155 @@ type UseCodeInputProps = {
   autoFocus?: boolean;
 };
 
-export const useCodeInput = ({ 
-  length = 6, 
+export const useCodeInput = ({
+  length = 6,
   onComplete,
-  autoFocus = true 
+  autoFocus = true,
 }: UseCodeInputProps = {}) => {
   const [code, setCode] = useState<string[]>(Array(length).fill(""));
-  const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Initialize refs array
-  const setInputRef = useCallback((index: number) => (el: HTMLInputElement | null) => {
-    inputRefs.current[index] = el;
-  }, []);
+  const setInputRef = useCallback(
+    (index: number) => (el: HTMLInputElement | null) => {
+      inputRefs.current[index] = el;
+    },
+    []
+  );
 
-  // Auto focus first input on mount and state changes
   useEffect(() => {
-    if (autoFocus && inputRefs.current[0]) {
+    if (autoFocus) {
       inputRefs.current[0]?.focus();
-      setFocusedIndex(0);
     }
   }, [autoFocus]);
 
   const focusInput = useCallback((index: number) => {
-    if (index >= 0 && index < length && inputRefs.current[index]) {
-      inputRefs.current[index]?.focus();
-      setFocusedIndex(index);
-    }
-  }, [length]);
+    inputRefs.current[index]?.focus();
+  }, []);
 
-  const handlePaste = useCallback((e: React.ClipboardEvent, index: number) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text');
-    const pastedCode = pastedData.replace(/\D/g, '').slice(0, length); // Alleen cijfers
-    
-    if (pastedCode.length > 0) {
-      const newCode = [...code];
-      
-      // Vul de code in vanaf de huidige index
-      for (let i = 0; i < pastedCode.length && (index + i) < length; i++) {
-        newCode[index + i] = pastedCode[i];
+  const runOnComplete = useCallback(
+    (next: string[]) => {
+      if (onComplete && next.every(Boolean)) {
+        onComplete(next.join(""));
       }
-      
-      setCode(newCode);
-      
-      // Focus op het volgende lege veld of laatste veld
-      const nextEmptyIndex = newCode.findIndex((digit, i) => i >= index && digit === "");
-      const focusIndex = nextEmptyIndex === -1 ? length - 1 : Math.min(nextEmptyIndex, length - 1);
-      focusInput(focusIndex);
-      
-      // Auto-submit als de code compleet is
-      if (newCode.every(digit => digit !== "") && onComplete) {
-        onComplete(newCode.join(""));
-      }
-    }
-  }, [code, length, focusInput, onComplete]);
+    },
+    [onComplete]
+  );
 
-  const handleCodeChange = useCallback((
-    index: number, 
-    value: string
-  ) => {
-    // Alleen cijfers accepteren
-    const numericValue = value.replace(/\D/g, '');
-    
-    if (numericValue.length > 1) {
-      // Handle paste-like behavior voor multiple digits
-      const digits = numericValue.split('').slice(0, length - index);
-      const newCode = [...code];
-      
-      digits.forEach((digit, i) => {
-        if (index + i < length) {
-          newCode[index + i] = digit;
-        }
+  const updateCode = useCallback(
+    (next: string[]) => {
+      setCode(next);
+      runOnComplete(next);
+    },
+    [runOnComplete]
+  );
+
+  const handleCodeChange = useCallback(
+    (index: number, rawValue: string) => {
+      const value = rawValue.replace(/\D/g, "");
+
+      if (!value) {
+        if (!code[index]) return;
+        const next = [...code];
+        next[index] = "";
+        updateCode(next);
+        return;
+      }
+
+      const digits = value.split("").slice(0, length - index);
+      const next = [...code];
+
+      digits.forEach((digit, offset) => {
+        next[index + offset] = digit;
       });
-      
-      setCode(newCode);
-      
-      // Focus op het volgende lege veld of laatste veld
-      const nextEmptyIndex = newCode.findIndex((digit, i) => i >= index && digit === "");
-      const focusIndex = nextEmptyIndex === -1 ? length - 1 : Math.min(nextEmptyIndex + digits.length - 1, length - 1);
-      focusInput(focusIndex);
-      
-      // Auto-submit als de code compleet is
-      if (newCode.every(digit => digit !== "") && onComplete) {
-        onComplete(newCode.join(""));
-      }
-      return;
-    }
-    
-    // Single digit input
-    if (numericValue.length <= 1) {
-      const newCode = [...code];
-      newCode[index] = numericValue;
-      setCode(newCode);
-      
-      // Auto-focus volgende input bij invoer, focus vorige bij delete
-      if (numericValue && index < length - 1) {
-        focusInput(index + 1);
-      }
-      
-      // Auto-submit bij laatste karakter
-      if (index === length - 1 && numericValue && onComplete) {
-        const fullCode = newCode.join("");
-        if (fullCode.length === length) {
-          onComplete(fullCode);
-        }
-      }
-    }
-  }, [code, length, focusInput, onComplete]);
 
-  const handleKeyDown = useCallback((
-    index: number, 
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    switch (e.key) {
-      case "Backspace":
+      updateCode(next);
+      const nextIndex = Math.min(index + digits.length, length - 1);
+      focusInput(nextIndex);
+    },
+    [code, focusInput, length, updateCode]
+  );
+
+  const handleKeyDown = useCallback(
+    (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Backspace") {
         e.preventDefault();
-        if (!code[index] && index > 0) {
-          // Leeg huidig veld en focus vorige
-          const newCode = [...code];
-          newCode[index - 1] = "";
-          setCode(newCode);
-          focusInput(index - 1);
-        } else if (code[index]) {
-          // Wis huidig veld maar blijf gefocust
-          const newCode = [...code];
-          newCode[index] = "";
-          setCode(newCode);
+        const next = [...code];
+
+        if (next[index]) {
+          next[index] = "";
+          updateCode(next);
+          return;
         }
-        break;
-        
-      case "ArrowLeft":
-        e.preventDefault();
+
         if (index > 0) {
+          next[index - 1] = "";
+          updateCode(next);
           focusInput(index - 1);
         }
-        break;
-        
-      case "ArrowRight":
+        return;
+      }
+
+      if (e.key === "ArrowLeft" && index > 0) {
         e.preventDefault();
-        if (index < length - 1) {
-          focusInput(index + 1);
-        }
-        break;
-        
-      case "ArrowUp":
-      case "ArrowDown":
+        focusInput(index - 1);
+        return;
+      }
+
+      if (e.key === "ArrowRight" && index < length - 1) {
         e.preventDefault();
-        break;
-        
-      default:
-        // Prevent non-numeric input
-        if (e.key.length === 1 && !/\d/.test(e.key)) {
-          e.preventDefault();
-        }
-        break;
-    }
-  }, [code, length, focusInput]);
+        focusInput(index + 1);
+        return;
+      }
+
+      if (e.key.length === 1 && !/\d/.test(e.key)) {
+        e.preventDefault();
+      }
+    },
+    [code, focusInput, length, updateCode]
+  );
+
+  const handlePaste = useCallback(
+    (event: ClipboardEvent, index: number) => {
+      event.preventDefault();
+      const digits = event.clipboardData
+        .getData("text")
+        .replace(/\D/g, "")
+        .slice(0, length - index);
+
+      if (!digits) return;
+
+      const next = [...code];
+      digits.split("").forEach((digit, offset) => {
+        next[index + offset] = digit;
+      });
+
+      updateCode(next);
+      const targetIndex = Math.min(index + digits.length, length - 1);
+      focusInput(targetIndex);
+    },
+    [code, focusInput, length, updateCode]
+  );
 
   const handleFocus = useCallback((index: number) => {
-    setFocusedIndex(index);
-    // Select alle tekst in het input veld voor gemakkelijke vervanging
-    setTimeout(() => {
-      inputRefs.current[index]?.select();
-    }, 0);
+    const node = inputRefs.current[index];
+    if (node) {
+      node.setSelectionRange(0, node.value.length);
+    }
   }, []);
 
   const resetCode = useCallback(() => {
-    setCode(Array(length).fill(""));
+    updateCode(Array(length).fill(""));
     focusInput(0);
-  }, [length, focusInput]);
-
-  const setFocusToFirst = useCallback(() => {
-    focusInput(0);
-  }, [focusInput]);
-
-  const isCodeComplete = code.every(digit => digit !== "");
+  }, [focusInput, length, updateCode]);
 
   return {
     code,
-    setCode,
-    focusedIndex,
-    inputRefs: inputRefs.current,
+    isCodeComplete: code.every(Boolean),
     setInputRef,
     handleCodeChange,
     handleKeyDown,
     handlePaste,
     handleFocus,
     resetCode,
-    setFocusToFirst,
-    focusInput,
-    isCodeComplete
   };
 };

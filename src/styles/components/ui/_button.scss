@@ -60,7 +60,17 @@
   }
 
   &__spinner {
-    display: inline-block;
-    transform: translateY(2px);
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 999px;
+    animation: button-spinner 0.75s linear infinite;
+  }
+}
+
+@keyframes button-spinner {
+  to {
+    transform: rotate(360deg);
   }
 }
