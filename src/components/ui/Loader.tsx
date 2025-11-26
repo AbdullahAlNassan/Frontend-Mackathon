@@ -8,6 +8,7 @@ type LoaderProps = {
   variant?: LoaderVariant;
   label?: string;
   className?: string;
+  className?: string;
 };
 
 export default function Loader({
