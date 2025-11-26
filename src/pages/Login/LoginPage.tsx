@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { useAuth, useCountdown } from "../../hooks";
-import { Button, Input, Form, FormField, PageLoader } from "../../components/ui";
+import { Alert, Button, Input, Form, FormField, PageLoader } from "../../components/ui";
 
 export default function LoginPage() {
   const {
@@ -45,11 +45,7 @@ export default function LoginPage() {
         <p className="login-page__subtitle">Voer je gegevens in om verder te gaan</p>
       </div>
 
-      {errors.general && (
-        <div className="login-page__error-banner" role="alert">
-          {errors.general}
-        </div>
-      )}
+      {errors.general && <Alert variant="error">{errors.general}</Alert>}
 
       <Form onSubmit={submitCredentials} spacing="md" className="login-page__form">
         <FormField label="E-mailadres" error={errors.email} required>
@@ -82,10 +78,6 @@ export default function LoginPage() {
           {isLoading ? "Bezig..." : "Inloggen"}
         </Button>
       </Form>
-
-      <div className="login-page__demo-hint">
-        <p>Tip: gebruik <code>totp@voorbeeld.nl</code> of <code>setup@voorbeeld.nl</code> om de MFA-stromen te testen.</p>
-      </div>
     </>
   );
 
@@ -135,11 +127,7 @@ export default function LoginPage() {
           <p className="login-page__subtitle">{titles[variant].subtitle}</p>
         </div>
 
-        {errors.code && (
-          <div className="login-page__error-banner" role="alert">
-            {errors.code}
-          </div>
-        )}
+        {errors.code && <Alert variant="error">{errors.code}</Alert>}
 
         <Form onSubmit={handleCodeFormSubmit} spacing="md">
           <div className="login-page__code-section">
