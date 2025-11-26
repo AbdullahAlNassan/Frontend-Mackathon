@@ -4,7 +4,7 @@ import Sidebar from "../../components/Layout/Sidebar";
 import MapView from "./MapView";
 import ContainerList from "./ContainerList";
 import type { Container } from "./types";
-
+import { Button } from "../../components/ui";
 export default function DashboardPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [techEnabled, setTechEnabled] = useState(true);
@@ -76,7 +76,7 @@ export default function DashboardPage() {
         onClose={() => setMenuOpen(false)}
       />
 
-      <button
+      <Button
         className={`backdrop ${menuOpen ? "is-visible" : ""}`}
         aria-hidden={!menuOpen}
         onClick={() => setMenuOpen(false)}
