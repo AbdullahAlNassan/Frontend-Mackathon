@@ -2,41 +2,80 @@ import { useEffect, useId, useState } from "react";
 import Header from "../../components/Layout/Header";
 import Sidebar from "../../components/Layout/Sidebar";
 import MapView from "./MapView";
+import ContainerList from "./ContainerList";
+import type { Container } from "./types";
 
 export default function DashboardPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [techEnabled, setTechEnabled] = useState(true);
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  const [refreshMs, setRefreshMs] = useState(5000);
   const sidebarId = useId();
 
-  // Sluit automatisch bij resize naar desktop
+  // we can replace this later with api
+  const [containers, setContainers] = useState<Container[]>([
+    { id: 1, name: "Container 1", lat: 52.37, lng: 4.9, status: "active" },
+    { id: 2, name: "Container 2", lat: 52.375, lng: 4.91, status: "active" },
+    { id: 3, name: "Container 3", lat: 52.365, lng: 4.89, status: "warning" },
+    { id: 4, name: "Container 4", lat: 52.38, lng: 4.92, status: "offline" },
+    { id: 5, name: "Container 5", lat: 52.36, lng: 4.88, status: "active" },
+  ]);
+
+  //  Fetch containers from b
   useEffect(() => {
+    // Example:
+    // fetch('/api/containers')
+    //   .then(res => res.json())
+    //   .then(data => setContainers(data));
+  }, [refreshMs]); // Re-fetch when refresh interval changes
+
+  const handleContainerClick = (container: Container) => {
+    // TODO: Navigate to Grafana or detail page (later)
+    console.log("Container clicked:", container);
+    // Example: window.location.href = `/grafana/${container.id}`;
+    // Or: navigate(`/container/${container.id}`);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handler = () => {
       if (window.matchMedia("(min-width: 1024px)").matches) {
         setMenuOpen(false);
       }
     };
+
     window.addEventListener("resize", handler);
     return () => window.removeEventListener("resize", handler);
   }, []);
 
-  // Sluit met Escape als overlay zichtbaar is
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
+    };
+
+    if (menuOpen) {
+      window.addEventListener("keydown", onKey);
     }
-    if (menuOpen) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
   return (
     <section className={`dashboard ${menuOpen ? "dashboard--menu-open" : ""}`}>
-      <Header onMenuToggle={() => setMenuOpen((v) => !v)} menuOpen={menuOpen} />
+      <Header
+        onMenuToggle={() => setMenuOpen((v) => !v)}
+        menuOpen={menuOpen}
+        onTechChange={setTechEnabled}
+        onAlertChange={setAlertsEnabled}
+        onRefreshChange={setRefreshMs}
+      />
+
       <Sidebar
         id={sidebarId}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
       />
 
-      {/* overlay alleen mobiel/tablet */}
       <button
         className={`backdrop ${menuOpen ? "is-visible" : ""}`}
         aria-hidden={!menuOpen}
@@ -45,8 +84,23 @@ export default function DashboardPage() {
       />
 
       <main className="dashboard__content" role="main">
-        <div className="dashboard__map">
-          <MapView reflowDeps={[menuOpen]} />
+        {/* Desktop +tablet : Map met markers */}
+        <div className="dashboard__map dashboard__map--desktop">
+          <MapView
+            containers={containers}
+            onContainerClick={handleContainerClick}
+            reflowDeps={[menuOpen, refreshMs, techEnabled, alertsEnabled]}
+            techEnabled={techEnabled}
+            alertsEnabled={alertsEnabled}
+          />
+        </div>
+
+        {/* Mobile: Container list */}
+        <div className="dashboard__container-list dashboard__container-list--mobile">
+          <ContainerList
+            containers={containers}
+            onContainerClick={handleContainerClick}
+          />
         </div>
       </main>
     </section>
