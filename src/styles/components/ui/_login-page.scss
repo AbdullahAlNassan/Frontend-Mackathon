@@ -163,6 +163,22 @@
     margin-top: var(--space-16);
   }
 
+  &__links {
+    margin-top: var(--space-12);
+    text-align: center;
+  }
+
+  &__link {
+    font-size: var(--fs-sm);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   // 2FA Code Section
   &__code-section {
     margin-bottom: var(--space-24);

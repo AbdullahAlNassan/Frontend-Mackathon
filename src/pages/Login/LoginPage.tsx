@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { useAuth, useCountdown } from "../../hooks";
 import { Alert, Button, Input, Form, FormField, PageLoader } from "../../components/ui";
 
@@ -78,6 +79,12 @@ export default function LoginPage() {
           {isLoading ? "Bezig..." : "Inloggen"}
         </Button>
       </Form>
+
+      <div className="login-page__links">
+        <Link to="/wachtwoord-vergeten" className="login-page__link">
+          Wachtwoord vergeten?
+        </Link>
+      </div>
     </>
   );
 
