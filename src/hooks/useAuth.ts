@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCodeInput } from "./useCodeInput";
 import type { User } from "../types/auth";
+import { authApi } from "../services/api";
 
 type AuthStep = "credentials" | "emailCode" | "totpCode" | "totpSetup" | "success";
 
@@ -91,16 +92,13 @@ export const useAuth = () => {
   );
 
   const submitCredentials = useCallback(
-    (event: FormEvent) => {
+    async (event: FormEvent) => {
       event.preventDefault();
 
+      // Validatie (bestaande code)
       const nextErrors: AuthErrors = {};
-      if (!email.trim()) {
-        nextErrors.email = "E-mail is verplicht";
-      }
-      if (!password.trim()) {
-        nextErrors.password = "Wachtwoord is verplicht";
-      }
+      if (!email.trim()) nextErrors.email = "E-mail is verplicht";
+      if (!password.trim()) nextErrors.password = "Wachtwoord is verplicht";
 
       if (Object.keys(nextErrors).length) {
         setErrors(nextErrors);
@@ -110,32 +108,28 @@ export const useAuth = () => {
       setErrors({});
       setIsLoading(true);
 
-      setTimeout(() => {
+      try {
+        // �� HIER IS DE MAGIC - Roep de echte backend aan!
+        const { token, user } = await authApi.login(email, password);
+        
+        // Sla token op (zodat je ingelogd blijft)
+        localStorage.setItem("token", token);
+        
+        // Ga naar dashboard
+        setUser(user);
+        setStep("success");
+        setTimeout(() => navigate("/dashboard"), 600);
+        
+      } catch (error) {
+        // Toon foutmelding als login mislukt
+        setErrors({ 
+          general: error instanceof Error ? error.message : "Login mislukt" 
+        });
+      } finally {
         setIsLoading(false);
-        const scenario = resolveScenario(email);
-
-        switch (scenario.kind) {
-          case "error":
-            setErrors({ general: scenario.message });
-            break;
-          case "direct":
-            completeLogin(email);
-            break;
-          case "email":
-            setStep("emailCode");
-            resetCode();
-            break;
-          case "totp":
-            setStep("totpCode");
-            resetCode();
-            break;
-          case "setup":
-            setStep("totpSetup");
-            break;
-        }
-      }, 800);
+      }
     },
-    [email, password, completeLogin, resetCode]
+    [email, password, navigate]
   );
 
   const submitCode = useCallback(
