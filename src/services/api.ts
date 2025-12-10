@@ -19,4 +19,30 @@ export const authApi = {
 
     return response.json(); // { token, user }
   },
+
+  async logout() {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("Geen token gevonden");
+    }
+
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Logout mislukt");
+    }
+
+    // token verwijderen uit storage
+    localStorage.removeItem("accessToken");
+
+    return response.json();
+  },
 };
