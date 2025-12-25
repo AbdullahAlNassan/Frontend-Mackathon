@@ -36,8 +36,8 @@ export const authApi = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Logout mislukt");
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || err.error || "Login mislukt");
     }
 
     // token verwijderen uit storage
