@@ -45,4 +45,28 @@ export const authApi = {
 
     return response.json();
   },
+
+  async me() {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("Geen token gevonden");
+    }
+
+    const response = await fetch(`${API_URL}/auth/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // token ongeldig/verlopen
+      localStorage.removeItem("accessToken");
+      throw new Error("Niet ingelogd");
+    }
+
+    return response.json(); // verwacht user info
+  },
 };
