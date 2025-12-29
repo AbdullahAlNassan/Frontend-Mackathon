@@ -2,8 +2,14 @@ import { useState, useCallback, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCodeInput } from "./useCodeInput";
 import type { User } from "../types/auth";
+import { authApi } from "../services/api";
 
-type AuthStep = "credentials" | "emailCode" | "totpCode" | "totpSetup" | "success";
+type AuthStep =
+  | "credentials"
+  | "emailCode"
+  | "totpCode"
+  | "totpSetup"
+  | "success";
 
 type AuthErrors = {
   email?: string;
@@ -20,7 +26,9 @@ type Scenario =
   | { kind: "error"; message: string };
 
 const createUser = (email: string): User => ({
-  id: `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+  id: `user-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 6)}`,
   username: email,
   role: "user",
   email,
@@ -90,17 +98,24 @@ export const useAuth = () => {
     [navigate]
   );
 
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+      setUser(null);
+      navigate("/inloggen");
+    } catch (error) {
+      console.error("Logout mislukt", error);
+    }
+  }, [navigate]);
+
   const submitCredentials = useCallback(
-    (event: FormEvent) => {
+    async (event: FormEvent) => {
       event.preventDefault();
 
+      // Validatie (bestaande code)
       const nextErrors: AuthErrors = {};
-      if (!email.trim()) {
-        nextErrors.email = "E-mail is verplicht";
-      }
-      if (!password.trim()) {
-        nextErrors.password = "Wachtwoord is verplicht";
-      }
+      if (!email.trim()) nextErrors.email = "E-mail is verplicht";
+      if (!password.trim()) nextErrors.password = "Wachtwoord is verplicht";
 
       if (Object.keys(nextErrors).length) {
         setErrors(nextErrors);
@@ -110,32 +125,32 @@ export const useAuth = () => {
       setErrors({});
       setIsLoading(true);
 
-      setTimeout(() => {
-        setIsLoading(false);
-        const scenario = resolveScenario(email);
+      try {
+        const response = await authApi.login(email, password);
 
-        switch (scenario.kind) {
-          case "error":
-            setErrors({ general: scenario.message });
-            break;
-          case "direct":
-            completeLogin(email);
-            break;
-          case "email":
-            setStep("emailCode");
-            resetCode();
-            break;
-          case "totp":
-            setStep("totpCode");
-            resetCode();
-            break;
-          case "setup":
-            setStep("totpSetup");
-            break;
-        }
-      }, 800);
+        // backend response:
+        // { message, data: { accessToken, user } }
+        const { accessToken, user } = response.data;
+
+        // ✅ juiste key gebruiken (zoals logout verwacht)
+        localStorage.setItem("accessToken", accessToken);
+
+        // user opslaan in state
+        setUser(user);
+
+        // login klaar
+        setStep("success");
+        setTimeout(() => navigate("/dashboard"), 600);
+      } catch (error) {
+        // Toon foutmelding als login mislukt
+        setErrors({
+          general: error instanceof Error ? error.message : "Login mislukt",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [email, password, completeLogin, resetCode]
+    [email, password, navigate]
   );
 
   const submitCode = useCallback(
@@ -225,5 +240,6 @@ export const useAuth = () => {
     resendCode,
     startTotpEntry,
     skipTotpSetup,
+    logout,
   };
 };
