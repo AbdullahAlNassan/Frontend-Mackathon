@@ -1,0 +1,20 @@
+.not-found {
+  padding: var(--space-24);
+
+  &__title {
+    margin: 0;
+  }
+
+  &__text {
+    margin-top: var(--space-12);
+    color: var(--color-muted);
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--space-12);
+    margin-top: var(--space-16);
+  }
+}
+
+
