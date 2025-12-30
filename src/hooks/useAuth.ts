@@ -13,45 +13,12 @@ type AuthErrors = {
   code?: string;
 };
 
-type Scenario =
-  | { kind: "direct" }
-  | { kind: "email" }
-  | { kind: "totp" }
-  | { kind: "setup" }
-  | { kind: "error"; message: string };
-
 const createUser = (email: string): User => ({
   id: `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
   username: email,
   role: "user",
   email,
 });
-
-const resolveScenario = (email: string): Scenario => {
-  const normalized = email.trim().toLowerCase();
-
-  if (!normalized) {
-    return { kind: "error", message: "E-mailadres ontbreekt" };
-  }
-
-  if (normalized.includes("error")) {
-    return { kind: "error", message: "Onjuiste inloggegevens" };
-  }
-
-  if (normalized.includes("direct")) {
-    return { kind: "direct" };
-  }
-
-  if (normalized.includes("setup")) {
-    return { kind: "setup" };
-  }
-
-  if (normalized.includes("totp")) {
-    return { kind: "totp" };
-  }
-
-  return { kind: "email" };
-};
 
 export const useAuth = () => {
   const navigate = useNavigate();

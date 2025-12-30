@@ -3,6 +3,7 @@ import { IoMdSettings } from "react-icons/io";
 import { HiOutlineDocumentText, HiOutlineChartBar } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
 import { MdColorLens } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 type SidebarProps = {
   id: string;
@@ -19,7 +20,6 @@ export default function Sidebar({ id, open, onClose }: SidebarProps) {
     <aside
       id={id}
       className={`sidebar ${open ? "is-open" : ""}`}
-      aria-hidden={!open}
       onKeyDown={onKeyDown}
     >
       <nav aria-label="Primaire navigatie" className="sidebar__nav">
@@ -31,10 +31,10 @@ export default function Sidebar({ id, open, onClose }: SidebarProps) {
             <span className="dropdown__arrow">›</span>
           </summary>
           <div className="dropdown__content">
-            <a className="dropdown__item" href="#">
+            <Link className="dropdown__item" to="/dashboard" onClick={onClose}>
               <HiOutlineChartBar className="dropdown__item-icon" />
               Overview
-            </a>
+            </Link>
             <a className="dropdown__item" href="#">
               <HiOutlineDocumentText className="dropdown__item-icon" />
               Logs

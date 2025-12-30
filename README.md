@@ -4,6 +4,15 @@ Dit is de frontend template voor het Mackathon-project.
 Gebouwd met React, TypeScript en Vite, met een duidelijke en schaalbare structuur.
 Het doel is om samenwerking eenvoudig te maken en herbruikbare UI-componenten te bieden.
 
+## Grafana iframe (Dashboard)
+
+De dashboard pagina embed nu Grafana via een `<iframe>`. Zet de URL in een Vite env var:
+
+- Maak `frontend/Frontend-Mackathon/.env.local`
+- Voeg toe:
+
+VITE_GRAFANA_IFRAME_SRC=http://localhost:3000/d-solo/...
+
 📂 Folderstructuur
 src/
 ┣ components/

@@ -54,6 +54,7 @@ export default function Header({
             className="header__menu-btn"
             leftIcon={<HiMenuAlt2 />}
             aria-label="Menu"
+            aria-expanded={menuOpen}
           />
         )}
 

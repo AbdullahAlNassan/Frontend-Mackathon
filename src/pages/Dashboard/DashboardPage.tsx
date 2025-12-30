@@ -1,9 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import Header from "../../components/Layout/Header";
 import Sidebar from "../../components/Layout/Sidebar";
-import MapView from "./MapView";
-import ContainerList from "./ContainerList";
-import type { Container } from "./types";
 import { Button } from "../../components/ui";
 export default function DashboardPage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,29 +9,37 @@ export default function DashboardPage() {
   const [refreshMs, setRefreshMs] = useState(5000);
   const sidebarId = useId();
 
-  // we can replace this later with api
-  const [containers, setContainers] = useState<Container[]>([
-    { id: 1, name: "Container 1", lat: 52.37, lng: 4.9, status: "active" },
-    { id: 2, name: "Container 2", lat: 52.375, lng: 4.91, status: "active" },
-    { id: 3, name: "Container 3", lat: 52.365, lng: 4.89, status: "warning" },
-    { id: 4, name: "Container 4", lat: 52.38, lng: 4.92, status: "offline" },
-    { id: 5, name: "Container 5", lat: 52.36, lng: 4.88, status: "active" },
-  ]);
+  const grafanaIframeSrcRaw = (
+    import.meta.env.VITE_GRAFANA_IFRAME_SRC ?? ""
+  ).trim();
 
-  //  Fetch containers from b
-  useEffect(() => {
-    // Example:
-    // fetch('/api/containers')
-    //   .then(res => res.json())
-    //   .then(data => setContainers(data));
-  }, [refreshMs]); // Re-fetch when refresh interval changes
-
-  const handleContainerClick = (container: Container) => {
-    // TODO: Navigate to Grafana or detail page (later)
-    console.log("Container clicked:", container);
-    // Example: window.location.href = `/grafana/${container.id}`;
-    // Or: navigate(`/container/${container.id}`);
+  const formatGrafanaRefresh = (ms: number) => {
+    if (!Number.isFinite(ms) || ms <= 0) return "5s";
+    if (ms % 60000 === 0) return `${ms / 60000}m`;
+    if (ms % 1000 === 0) return `${ms / 1000}s`;
+    return `${ms}ms`;
   };
+
+  let grafanaIframeSrc: string | null = null;
+  let grafanaConfigError: string | null = null;
+
+  if (!grafanaIframeSrcRaw) {
+    grafanaConfigError =
+      "Grafana embed is niet geconfigureerd. Zet VITE_GRAFANA_IFRAME_SRC in je .env/.env.local en herstart `npm run dev`. (Locatie: `frontend/Frontend-Mackathon/.env.local` óf project-root `.env`.)";
+  } else {
+    try {
+      const url = new URL(grafanaIframeSrcRaw);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error("Unsupported protocol");
+      }
+      // Let Grafana auto-refresh the panel based on the dashboard refresh setting in our UI.
+      url.searchParams.set("refresh", formatGrafanaRefresh(refreshMs));
+      grafanaIframeSrc = url.toString();
+    } catch {
+      grafanaConfigError =
+        "VITE_GRAFANA_IFRAME_SRC is geen geldige http(s) URL. Tip: zet hier alleen de URL (niet een volledige <iframe ...> tag) en herstart `npm run dev`.";
+    }
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -79,29 +84,30 @@ export default function DashboardPage() {
 
       <Button
         className={`backdrop ${menuOpen ? "is-visible" : ""}`}
-        aria-hidden={!menuOpen}
+        aria-hidden={menuOpen ? "false" : "true"}
         onClick={() => setMenuOpen(false)}
         tabIndex={-1}
       />
 
       <main className="dashboard__content" role="main">
-        {/* Desktop +tablet : Map met markers */}
-        <div className="dashboard__map dashboard__map--desktop">
-          <MapView
-            containers={containers}
-            onContainerClick={handleContainerClick}
-            reflowDeps={[menuOpen, refreshMs, techEnabled, alertsEnabled]}
-            techEnabled={techEnabled}
-            alertsEnabled={alertsEnabled}
-          />
-        </div>
-
-        {/* Mobile: Container list */}
-        <div className="dashboard__container-list dashboard__container-list--mobile">
-          <ContainerList
-            containers={containers}
-            onContainerClick={handleContainerClick}
-          />
+        <div className="dashboard__grafana" data-tech={techEnabled} data-alerts={alertsEnabled}>
+          {grafanaIframeSrc ? (
+            <iframe
+              className="dashboard__grafana-iframe"
+              src={grafanaIframeSrc}
+              title="Grafana dashboard"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              allow="fullscreen"
+            />
+          ) : (
+            <div className="dashboard__grafana-empty" role="status">
+              <p className="dashboard__grafana-empty-title">
+                Grafana dashboard niet beschikbaar
+              </p>
+              <p className="dashboard__grafana-empty-body">{grafanaConfigError}</p>
+            </div>
+          )}
         </div>
       </main>
     </section>

@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
 
 type LoaderSize = "sm" | "md" | "lg";
-type LoaderVariant = "circular" | "dots" | "pulse";
+type LoaderVariant = "circular" | "spinner" | "dots" | "pulse";
 
 type LoaderProps = {
   size?: LoaderSize;
   variant?: LoaderVariant;
   label?: string;
-  className?: string;
   className?: string;
 };
 
@@ -17,10 +16,11 @@ export default function Loader({
   label,
   className: customClassName,
 }: LoaderProps) {
+  const resolvedVariant = variant === "spinner" ? "circular" : variant;
   const classes = [
     "loader",
     `loader--${size}`,
-    `loader--${variant}`,
+    `loader--${resolvedVariant}`,
     customClassName,
   ]
     .filter(Boolean)
@@ -29,9 +29,9 @@ export default function Loader({
 
   return (
     <div className={classes} role="status" aria-label={label || "Laden"}>
-      {variant === "circular" && <CircularLoader />}
-      {variant === "dots" && <DotsLoader />}
-      {variant === "pulse" && <PulseLoader />}
+      {resolvedVariant === "circular" && <CircularLoader />}
+      {resolvedVariant === "dots" && <DotsLoader />}
+      {resolvedVariant === "pulse" && <PulseLoader />}
       {label && <span className="loader__label">{label}</span>}
     </div>
   );
