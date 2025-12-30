@@ -4,7 +4,12 @@ import { useCodeInput } from "./useCodeInput";
 import type { User } from "../types/auth";
 import { authApi } from "../services/api";
 
-type AuthStep = "credentials" | "emailCode" | "totpCode" | "totpSetup" | "success";
+type AuthStep =
+  | "credentials"
+  | "emailCode"
+  | "totpCode"
+  | "totpSetup"
+  | "success";
 
 type AuthErrors = {
   email?: string;
@@ -14,7 +19,9 @@ type AuthErrors = {
 };
 
 const createUser = (email: string): User => ({
-  id: `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+  id: `user-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 6)}`,
   username: email,
   role: "user",
   email,
@@ -58,6 +65,16 @@ export const useAuth = () => {
     [navigate]
   );
 
+  const logout = useCallback(async () => {
+    try {
+      await authApi.logout();
+      setUser(null);
+      navigate("/inloggen");
+    } catch (error) {
+      console.error("Logout mislukt", error);
+    }
+  }, [navigate]);
+
   const submitCredentials = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
@@ -76,21 +93,25 @@ export const useAuth = () => {
       setIsLoading(true);
 
       try {
-        // �� HIER IS DE MAGIC - Roep de echte backend aan!
-        const { token, user } = await authApi.login(email, password);
-        
-        // Sla token op (zodat je ingelogd blijft)
-        localStorage.setItem("token", token);
-        
-        // Ga naar dashboard
+        const response = await authApi.login(email, password);
+
+        // backend response:
+        // { message, data: { accessToken, user } }
+        const { accessToken, user } = response.data;
+
+        // ✅ juiste key gebruiken (zoals logout verwacht)
+        localStorage.setItem("accessToken", accessToken);
+
+        // user opslaan in state
         setUser(user);
+
+        // login klaar
         setStep("success");
         setTimeout(() => navigate("/dashboard"), 600);
-        
       } catch (error) {
         // Toon foutmelding als login mislukt
-        setErrors({ 
-          general: error instanceof Error ? error.message : "Login mislukt" 
+        setErrors({
+          general: error instanceof Error ? error.message : "Login mislukt",
         });
       } finally {
         setIsLoading(false);
@@ -186,5 +207,6 @@ export const useAuth = () => {
     resendCode,
     startTotpEntry,
     skipTotpSetup,
+    logout,
   };
 };

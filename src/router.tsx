@@ -2,15 +2,15 @@ import { createBrowserRouter } from "react-router-dom";
 import LoginPage from "./pages/Login/LoginPage";
 import ForgotPasswordPage from "./pages/Login/ForgotPasswordPage";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
-
+import ProtectedRoute from "./utiles/ProtectedRoute";
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <DashboardPage />,
-  },
-  {
     path: "/dashboard",
-    element: <DashboardPage />,
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />\
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/inloggen",

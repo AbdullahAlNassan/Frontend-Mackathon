@@ -4,6 +4,7 @@ import { HiMenuAlt2 } from "react-icons/hi";
 import { MdLogout } from "react-icons/md";
 import logo from "../../assets/images/logo.png";
 import { Button } from "../ui";
+import { useAuth } from "../../hooks";
 type HeaderProps = {
   onMenuToggle?: () => void;
   menuOpen?: boolean;
@@ -41,6 +42,8 @@ export default function Header({
     setRefreshMs(newValue);
     onRefreshChange?.(newValue);
   };
+
+  const { logout } = useAuth();
 
   return (
     <header className="header">
@@ -111,12 +114,12 @@ export default function Header({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => console.log("logout")}
+          onClick={logout}
           className="logout"
           leftIcon={<MdLogout />}
           aria-label="Log uit"
         >
-          logout
+          Logout
         </Button>
       </div>
     </header>

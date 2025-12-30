@@ -19,4 +19,54 @@ export const authApi = {
 
     return response.json(); // { token, user }
   },
+
+  async logout() {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("Geen token gevonden");
+    }
+
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || err.error || "Login mislukt");
+    }
+
+    // token verwijderen uit storage
+    localStorage.removeItem("accessToken");
+
+    return response.json();
+  },
+
+  async me() {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      throw new Error("Geen token gevonden");
+    }
+
+    const response = await fetch(`${API_URL}/auth/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // token ongeldig/verlopen
+      localStorage.removeItem("accessToken");
+      throw new Error("Niet ingelogd");
+    }
+
+    return response.json(); // verwacht user info
+  },
 };
