@@ -5,6 +5,7 @@ import { router } from "./router";
 import "./styles/globals.css";
 import "./styles/main.scss";
 import "leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

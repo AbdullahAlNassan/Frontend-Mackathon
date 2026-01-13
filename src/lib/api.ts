@@ -1,0 +1,14 @@
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Request failed: ${res.status}`);
+  }
+
+  return res.json() as Promise<T>;
+}
