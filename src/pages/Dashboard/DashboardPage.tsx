@@ -15,6 +15,8 @@ type BackendDevice = {
 };
 
 export default function DashboardPage() {
+  const json = await apiGet<{ data: BackendDevice[] }>("/api/v1/devices");
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [techEnabled, setTechEnabled] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
