@@ -10,9 +10,8 @@ type BackendDevice = {
   deviceId: string;
   lastSeen: string;
   online: boolean;
-  alert?: {
-    level: "ok" | "warning" | "critical";
-  };
+  alert?: { level: "ok" | "warning" | "critical" };
+  location?: { lat: number; lon: number; time: string } | null;
 };
 
 export default function DashboardPage() {
@@ -53,8 +52,8 @@ export default function DashboardPage() {
             return {
               id: d.deviceId,
               name: `Container ${index + 1}`,
-              lat: 52.37, // tijdelijk vast
-              lng: 4.9,
+              lat: d.location?.lat ?? 52.37,
+              lng: d.location?.lon ?? 4.9,
               status,
             };
           }

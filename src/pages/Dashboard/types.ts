@@ -9,7 +9,6 @@ export type BackendDevice = {
   };
 };
 
-// jouw UI type blijft bestaan, maar id wordt string
 export type Container = {
   id: string; // deviceId
   name: string;
