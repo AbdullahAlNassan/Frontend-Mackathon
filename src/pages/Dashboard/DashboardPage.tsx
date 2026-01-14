@@ -5,6 +5,7 @@ import MapView from "./MapView";
 import ContainerList from "./ContainerList";
 import type { Container } from "./types";
 import { Button } from "../../components/ui";
+import { useNavigate } from "react-router-dom";
 
 type BackendDevice = {
   deviceId: string;
@@ -15,18 +16,16 @@ type BackendDevice = {
 };
 
 export default function DashboardPage() {
-  const json = await apiGet<{ data: BackendDevice[] }>("/api/v1/devices");
-
   const [menuOpen, setMenuOpen] = useState(false);
   const [techEnabled, setTechEnabled] = useState(true);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   const [refreshMs, setRefreshMs] = useState(5000);
   const sidebarId = useId();
+  const navigate = useNavigate();
 
   const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔄 Fetch devices from backend
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -45,11 +44,11 @@ export default function DashboardPage() {
           (d: BackendDevice, index: number) => {
             let status: Container["status"] = "active";
 
-            if (!d.online) {
+            if (!d.online) status = "offline";
+            else if (alertsEnabled && d.alert?.level === "critical")
               status = "offline";
-            } else if (alertsEnabled && d.alert && d.alert.level !== "ok") {
+            else if (alertsEnabled && d.alert?.level === "warning")
               status = "warning";
-            }
 
             return {
               id: d.deviceId,
@@ -76,8 +75,7 @@ export default function DashboardPage() {
   }, [refreshMs, alertsEnabled]);
 
   const handleContainerClick = (container: Container) => {
-    console.log("Container clicked:", container);
-    // later: navigate(`/containers/${container.id}`)
+    navigate(`/containers/${container.id}`);
   };
 
   // Close sidebar on resize (desktop)

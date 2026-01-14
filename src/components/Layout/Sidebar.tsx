@@ -3,6 +3,7 @@ import { IoMdSettings } from "react-icons/io";
 import { HiOutlineDocumentText, HiOutlineChartBar } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
 import { MdColorLens } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 type SidebarProps = {
   id: string;
@@ -31,14 +32,11 @@ export default function Sidebar({ id, open, onClose }: SidebarProps) {
             <span className="dropdown__arrow">›</span>
           </summary>
           <div className="dropdown__content">
-            <a className="dropdown__item" href="#">
-              <HiOutlineChartBar className="dropdown__item-icon" />
-              Overview
-            </a>
-            <a className="dropdown__item" href="#">
+            <Link to="/dashboard">Overview</Link>
+            <Link className="dropdown__item" to="/logs">
               <HiOutlineDocumentText className="dropdown__item-icon" />
               Logs
-            </a>
+            </Link>
           </div>
         </details>
 

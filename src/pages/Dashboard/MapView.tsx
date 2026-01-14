@@ -47,6 +47,26 @@ function Reflow({ deps = [] as unknown[] }) {
 
   return null;
 }
+function FitBounds({ containers }: { containers: Container[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const pts = containers
+      .filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lng))
+      .map((c) => L.latLng(c.lat, c.lng));
+
+    if (pts.length === 0) return;
+
+    const bounds = L.latLngBounds(pts);
+
+    // padding zodat markers niet tegen rand zitten
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [containers.length]); // bewust: alleen als aantal verandert
+
+  return null;
+}
 
 type MapViewProps = {
   containers: Container[];
@@ -107,6 +127,8 @@ export default function MapView({
       }}
     >
       <Reflow deps={reflowDeps} />
+
+      <FitBounds containers={containers} />
 
       <TileLayer
         attribution="&copy; OpenStreetMap"
