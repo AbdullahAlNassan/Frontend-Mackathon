@@ -36,6 +36,9 @@ type SeriesRes = {
   }[];
 };
 
+const GRAFANA_URL = import.meta.env.VITE_GRAFANA_URL || "http://localhost:3001";
+const REFRESH_INTERVAL = 5000;
+
 export default function ContainerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const deviceId = id ?? "";
@@ -45,9 +48,10 @@ export default function ContainerDetailPage() {
   const [history, setHistory] = useState<AlertHistoryRes["data"]>([]);
   const [series, setSeries] = useState<SeriesRes["data"]>([]);
   const [range, setRange] = useState<"1h" | "24h" | "7d">("24h");
-  const [loading, setLoading] = useState(true);
 
-  const refreshMs = 5000;
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [seriesLoading, setSeriesLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Refresh status + current alert + history every 5s
   useEffect(() => {
@@ -59,13 +63,10 @@ export default function ContainerDetailPage() {
       try {
         const [s, aRes, h] = await Promise.all([
           apiGet<StatusRes>(`/api/v1/devices/${deviceId}/status`),
-
-          // 404 / errors => treat as no active alert
           apiGet<AlertRes>(`/api/v1/alerts/${deviceId}`).catch(() => null),
-
           apiGet<AlertHistoryRes>(
-            `/api/v1/alerts/${deviceId}/history?limit=50`
-          ).catch(() => ({ data: [] } as AlertHistoryRes)),
+            `/api/v1/alerts/${deviceId}/history?limit=50`,
+          ).catch(() => ({ data: [] }) as AlertHistoryRes),
         ]);
 
         if (cancelled) return;
@@ -73,13 +74,19 @@ export default function ContainerDetailPage() {
         setStatus(s.data);
         setAlert(aRes);
         setHistory(h.data);
+        setError(null);
+        setInitialLoading(false);
       } catch (e) {
         console.error(e);
+        if (!cancelled) {
+          setError("Fout bij ophalen van gegevens");
+          setInitialLoading(false);
+        }
       }
     }
 
     loadStatusAlertAndHistory();
-    const timer = setInterval(loadStatusAlertAndHistory, refreshMs);
+    const timer = setInterval(loadStatusAlertAndHistory, REFRESH_INTERVAL);
 
     return () => {
       cancelled = true;
@@ -87,7 +94,7 @@ export default function ContainerDetailPage() {
     };
   }, [deviceId]);
 
-  // Load series on init + when range changes (not every refresh)
+  // Load series on init + when range changes
   useEffect(() => {
     if (!deviceId) return;
 
@@ -95,14 +102,20 @@ export default function ContainerDetailPage() {
 
     async function loadSeries() {
       try {
-        setLoading(true);
+        setSeriesLoading(true);
         const se = await apiGet<SeriesRes>(
-          `/api/v1/sensor/series?deviceId=${deviceId}&range=${range}`
+          `/api/v1/sensor/series?deviceId=${deviceId}&range=${range}`,
         );
         if (cancelled) return;
         setSeries(se.data);
+        setError(null);
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) {
+          setError("Fout bij ophalen van sensor data");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setSeriesLoading(false);
       }
     }
 
@@ -122,8 +135,8 @@ export default function ContainerDetailPage() {
     );
   }
 
-  // Loading state (only for series load)
-  if (loading) {
+  // Initial loading state
+  if (initialLoading) {
     return (
       <div className="container-detail-page">
         <div className="loading-state">
@@ -144,6 +157,14 @@ export default function ContainerDetailPage() {
         <h1>Container Details</h1>
         <p className="device-id">Device ID: {deviceId}</p>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="error-banner">
+          <span>⚠</span>
+          {error}
+        </div>
+      )}
 
       {/* Grid met cards */}
       <div className="detail-grid">
@@ -248,38 +269,67 @@ export default function ContainerDetailPage() {
         {/* Series Card (full width) */}
         <div className="detail-card series-card">
           <h3>
-            <span>◆</span>
-            Sensordata
+            <span>📊</span>
+            Sensor Data
           </h3>
 
           <div className="range-selector">
             <button
               className={`range-button ${range === "1h" ? "active" : ""}`}
               onClick={() => setRange("1h")}
+              disabled={seriesLoading}
             >
               Laatste uur
             </button>
             <button
               className={`range-button ${range === "24h" ? "active" : ""}`}
               onClick={() => setRange("24h")}
+              disabled={seriesLoading}
             >
               Laatste 24 uur
             </button>
             <button
               className={`range-button ${range === "7d" ? "active" : ""}`}
               onClick={() => setRange("7d")}
+              disabled={seriesLoading}
             >
               Laatste 7 dagen
             </button>
           </div>
+
+          {seriesLoading && (
+            <div className="series-loading">
+              <div className="spinner-small"></div>
+              <span>Data laden...</span>
+            </div>
+          )}
 
           <div className="data-summary">
             <span className="summary-label">Totaal datapunten:</span>
             <span className="summary-value">{series.length}</span>
           </div>
 
-          {/* Placeholder voor Grafana of chart */}
-          <div className="chart-placeholder">Chart komt hier (Grafana)</div>
+          {/* Grafana Chart */}
+          <div className="chart-container">
+            <iframe
+              title="Grafana Chart"
+              src={`${GRAFANA_URL}/d-solo/adh8jq6/new-dashboard?orgId=1&from=now-${range}&to=now&timezone=browser&var-deviceId=${deviceId}&panelId=2`}
+              width="100%"
+              height={400}
+              frameBorder={0}
+            />
+          </div>
+
+          {/* Grafana Table */}
+          <div className="table-container">
+            <iframe
+              title="Grafana Table"
+              src={`${GRAFANA_URL}/d-solo/adh8jq6/new-dashboard?orgId=1&from=now-${range}&to=now&timezone=browser&var-deviceId=${deviceId}&panelId=1`}
+              width="100%"
+              height={420}
+              frameBorder={0}
+            />
+          </div>
         </div>
       </div>
     </div>
