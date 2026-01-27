@@ -4,7 +4,8 @@
 @forward "content";
 @forward "dashboard";
 @forward "map";
-
+@forward "containerdetailpage";
+@forward "logspage";
 /* app-grid container klasses hier, zodat layout samenkomt */
 .layout {
   display: grid;
