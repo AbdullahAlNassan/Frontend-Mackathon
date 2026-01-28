@@ -2,65 +2,190 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-8);
+  gap: 8px;
   padding: 12px 16px;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease,
-    transform 0.05s ease;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 
-  /* sizes */
+  /* Sizes */
   &--sm {
     padding: 8px 12px;
+    font-size: 0.875rem;
+    gap: 8px;
   }
+
   &--md {
     padding: 12px 16px;
-  }
-  &--lg {
-    padding: 14px 20px;
+    font-size: 1rem;
   }
 
-  /* variants */
+  &--lg {
+    padding: 16px 20px;
+    font-size: 1.125rem;
+    gap: 12px;
+  }
+
+  /* Full width modifier */
+  &--full-width {
+    width: 100%;
+  }
+
+  /* Variants */
   &--primary {
-    background: var(--color-primary);
+    background: var(--color-primary, #3b82f6);
     color: #fff;
+    border-color: var(--color-primary, #3b82f6);
 
     &:hover:not(:disabled) {
-      filter: brightness(0.98);
+      background: var(--color-primary-hover, #2563eb);
+      border-color: var(--color-primary-hover, #2563eb);
+      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
     }
+
     &:active:not(:disabled) {
       transform: scale(0.98);
+      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #3b82f6);
+      outline-offset: 2px;
+    }
+  }
+
+  &--secondary {
+    background: var(--color-secondary, #6b7280);
+    color: #fff;
+    border-color: var(--color-secondary, #6b7280);
+
+    &:hover:not(:disabled) {
+      background: var(--color-secondary-hover, #4b5563);
+      border-color: var(--color-secondary-hover, #4b5563);
+      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-secondary, #6b7280);
+      outline-offset: 2px;
     }
   }
 
   &--ghost {
     background: transparent;
-    color: var(--color-text);
-    border-color: var(--color-border);
+    color: var(--color-text, #1f2937);
+    border-color: var(--color-border, #e5e7eb);
+    box-shadow: none;
 
     &:hover:not(:disabled) {
-      border-color: var(--color-primary);
+      background: var(--color-bg-hover, #f3f4f6);
+      border-color: var(--color-primary, #3b82f6);
     }
+
     &:active:not(:disabled) {
       transform: scale(0.98);
+      background: var(--color-bg-active, #e5e7eb);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #3b82f6);
+      outline-offset: 2px;
     }
   }
 
-  /* states */
+  &--danger {
+    background: var(--color-danger, #ef4444);
+    color: #fff;
+    border-color: var(--color-danger, #ef4444);
+
+    &:hover:not(:disabled) {
+      background: var(--color-danger-hover, #dc2626);
+      border-color: var(--color-danger-hover, #dc2626);
+      box-shadow: var(--shadow-md, 0 4px 6px rgba(239, 68, 68, 0.3));
+    }
+
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-danger, #ef4444);
+      outline-offset: 2px;
+    }
+  }
+
+  /* States */
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none;
   }
 
   &--loading {
     pointer-events: none;
+    color: transparent;
   }
 
+  /* Icons */
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    &--left {
+      margin-right: -4px;
+    }
+
+    &--right {
+      margin-left: -4px;
+    }
+
+    svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  &__content {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Loading spinner */
   &__spinner {
-    display: inline-block;
-    transform: translateY(2px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__spinner-icon {
+    width: 1.25em;
+    height: 1.25em;
+    color: currentColor;
+  }
+
+  /* Focus styles */
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary, #3b82f6);
+    outline-offset: 2px;
   }
 }

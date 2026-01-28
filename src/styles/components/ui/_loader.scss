@@ -1,42 +1,123 @@
 .loader {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: 8px;
 
-  &--inline {
-    display: inline-flex;
+  // Sizes (4px grid)
+  &--sm {
+    .loader__circular,
+    .loader__pulse {
+      width: 16px;
+      height: 16px;
+      border-width: 2px;
+    }
+
+    .loader__dot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .loader__dots {
+      gap: 4px;
+    }
   }
 
-  &--sm .loader__spinner {
-    width: 14px;
-    height: 14px;
-  }
-  &--md .loader__spinner {
-    width: 18px;
-    height: 18px;
-  }
-  &--lg .loader__spinner {
-    width: 22px;
-    height: 22px;
+  &--md {
+    .loader__circular,
+    .loader__pulse {
+      width: 24px;
+      height: 24px;
+      border-width: 2px;
+    }
+
+    .loader__dot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .loader__dots {
+      gap: 6px;
+    }
   }
 
-  &__spinner {
-    width: 18px;
-    height: 18px;
+  &--lg {
+    .loader__circular,
+    .loader__pulse {
+      width: 32px;
+      height: 32px;
+      border-width: 3px;
+    }
+
+    .loader__dot {
+      width: 8px;
+      height: 8px;
+    }
+
+    .loader__dots {
+      gap: 8px;
+    }
+  }
+
+  // Circular variant (draaiende cirkel)
+  &__circular {
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--color-primary, #3b82f6);
     border-radius: 50%;
-    border: 2px solid var(--color-border);
-    border-top-color: var(--color-primary);
-    animation: loader-spin 0.8s linear infinite;
   }
 
+  // Dots variant (stuiterende stippen)
+  &__dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-primary, #3b82f6);
+    border-radius: 50%;
+  }
+
+  // Pulse variant (pulserende cirkel)
+  &__pulse {
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary, #3b82f6);
+    border-radius: 50%;
+  }
+
+  // Label
   &__label {
-    font-size: var(--fs-sm);
-    color: var(--color-muted);
+    font-size: 0.875rem;
+    color: var(--color-text, #374151);
   }
 }
 
-@keyframes loader-spin {
-  to {
-    transform: rotate(360deg);
+@keyframes loader-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes loader-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
   }
 }

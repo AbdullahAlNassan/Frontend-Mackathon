@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -6,14 +6,17 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   helperText?: ReactNode;
 };
 
-export default function Input({
-  label,
-  error,
-  helperText,
-  id,
-  name,
-  ...rest
-}: InputProps) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    label,
+    error,
+    helperText,
+    id,
+    name,
+    ...rest
+  },
+  ref
+) {
   const inputId = id ?? name ?? undefined;
   const errorId = inputId ? `${inputId}-error` : undefined;
 
@@ -22,6 +25,7 @@ export default function Input({
       {label && <span className="input__label">{label}</span>}
 
       <input
+        ref={ref}
         id={inputId}
         className={`input__control ${error ? "input__control--error" : ""}`}
         aria-invalid={!!error || undefined}
@@ -39,4 +43,6 @@ export default function Input({
       )}
     </label>
   );
-}
+});
+
+export default Input;

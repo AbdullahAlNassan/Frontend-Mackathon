@@ -5,7 +5,7 @@ type Option = {
   value: string;
 };
 
-type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
+type SelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> & {
   label?: string;
   options: Option[];
   error?: string;
@@ -40,7 +40,7 @@ export default function Select({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        aria-invalid={!!error || undefined}
+        aria-invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         {...rest}
       >
