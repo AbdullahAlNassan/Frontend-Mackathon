@@ -111,27 +111,49 @@ export default function LoginPage() {
     </div>
   );
 
-  const renderCodeStep = (variant: "email" | "totp") => {
-    const titles = {
-      email: {
+  const getCodeStepCopy = (variant: "email" | "totp", emailAddress: string) => {
+    if (variant === "email") {
+      return {
         title: "E-mail verificatie",
         subtitle: (
           <>
-            We hebben een code gestuurd naar <strong>{email}</strong>.
+            We hebben een code gestuurd naar <strong>{emailAddress}</strong>.
           </>
         ),
-      },
-      totp: {
-        title: "Authenticator app",
-        subtitle: <>Voer de code uit je authenticator app in.</>,
-      },
+      };
+    }
+
+    return {
+      title: "Authenticator app",
+      subtitle: <>Voer de code uit je authenticator app in.</>,
     };
+  };
+
+  const renderResendButton = () => (
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={handleResend}
+      isLoading={isResending}
+      disabled={isResending || countdown > 0}
+      className="login-page__resend-btn"
+    >
+      {isResending
+        ? "Verzenden..."
+        : countdown > 0
+          ? `Opnieuw verzenden (${countdown}s)`
+          : "Code opnieuw verzenden"}
+    </Button>
+  );
+
+  const renderCodeStep = (variant: "email" | "totp") => {
+    const { title, subtitle } = getCodeStepCopy(variant, email);
 
     return (
       <>
         <div className="login-page__header">
-          <h1 className="login-page__title">{titles[variant].title}</h1>
-          <p className="login-page__subtitle">{titles[variant].subtitle}</p>
+          <h1 className="login-page__title">{title}</h1>
+          <p className="login-page__subtitle">{subtitle}</p>
         </div>
 
         {errors.code && <Alert variant="error">{errors.code}</Alert>}
@@ -154,22 +176,7 @@ export default function LoginPage() {
               {isLoading ? "Controleren..." : "Verifieer"}
             </Button>
 
-            {variant === "email" && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleResend}
-                isLoading={isResending}
-                disabled={isResending || countdown > 0}
-                className="login-page__resend-btn"
-              >
-                {isResending
-                  ? "Verzenden..."
-                  : countdown > 0
-                    ? `Opnieuw verzenden (${countdown}s)`
-                    : "Code opnieuw verzenden"}
-              </Button>
-            )}
+            {variant === "email" && renderResendButton()}
           </div>
         </Form>
       </>
