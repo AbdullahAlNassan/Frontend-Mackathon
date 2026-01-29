@@ -1,6 +1,6 @@
 import { GoContainer } from "react-icons/go";
 import { IoMdSettings } from "react-icons/io";
-import { HiOutlineDocumentText, HiOutlineChartBar } from "react-icons/hi";
+import { HiOutlineDocumentText } from "react-icons/hi";
 import { FiUser } from "react-icons/fi";
 import { MdColorLens } from "react-icons/md";
 import { Link } from "react-router-dom";

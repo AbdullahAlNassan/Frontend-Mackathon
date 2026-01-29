@@ -1,10 +1,15 @@
 import { Outlet } from "react-router-dom";
+import type { ReactNode } from "react";
 
-export default function Content() {
+type ContentProps = {
+  children?: ReactNode;
+};
+
+export default function Content({ children }: ContentProps) {
   return (
     <main className="content">
       <div className="content__inner">
-        <Outlet />
+        {children ?? <Outlet />}
       </div>
     </main>
   );

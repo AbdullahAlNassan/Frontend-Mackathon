@@ -1,5 +1,7 @@
 // Dit is de URL van je backend
-const API_URL = "http://localhost:3000/api/v1";
+// In productie/test zet je VITE_API_URL (bijv. "https://<jouw-backend>/api/v1")
+const API_URL =
+  import.meta.env.VITE_API_URL ?? "http://localhost:3000/api/v1";
 
 export const authApi = {
   // Login functie - stuurt email + wachtwoord naar backend

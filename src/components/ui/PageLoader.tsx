@@ -2,12 +2,12 @@ import Loader from "./Loader";
 
 type PageLoaderProps = {
   text?: string;
-  variant?: "spinner" | "dots" | "pulse";
+  variant?: "circular" | "dots" | "pulse";
 };
 
 export default function PageLoader({ 
   text = "Bezig met laden...", 
-  variant = "spinner" 
+  variant = "circular" 
 }: PageLoaderProps) {
   return (
     <div className="page-loader">

@@ -22,19 +22,23 @@ export default function DashboardPage() {
   const [refreshMs, setRefreshMs] = useState(5000);
   const sidebarId = useId();
   const navigate = useNavigate();
+  const apiBase =
+    import.meta.env.VITE_API_URL ?? "http://localhost:3000/api/v1";
 
   const [containers, setContainers] = useState<Container[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval> | undefined;
 
     const fetchDevices = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:3000/api/v1/devices", {
+        const res = await fetch(`${apiBase}/devices`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token") ?? ""}`,
+            Authorization: `Bearer ${
+              localStorage.getItem("accessToken") ?? ""
+            }`,
           },
         });
 
@@ -71,7 +75,9 @@ export default function DashboardPage() {
     fetchDevices();
     timer = setInterval(fetchDevices, refreshMs);
 
-    return () => clearInterval(timer);
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [refreshMs, alertsEnabled]);
 
   const handleContainerClick = (container: Container) => {

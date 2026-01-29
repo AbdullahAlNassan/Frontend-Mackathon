@@ -122,9 +122,6 @@ export default function MapView({
       className="map"
       style={{ height: "100%", width: "100%" }}
       preferCanvas
-      whenCreated={(map) => {
-        setTimeout(() => map.invalidateSize(), 200);
-      }}
     >
       <Reflow deps={reflowDeps} />
 
